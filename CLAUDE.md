@@ -45,19 +45,17 @@ Full setup instructions: `docs/SUPABASE_SETUP.md`. Schema: `supabase/schema.sql`
 - **Sync-on-sign-in is centralized in `AuthContext.tsx`**, not scattered per auth method. It calls
   `syncService.syncNow()` once per session (guarded by a `syncedUserIdRef`, reset on `SIGNED_OUT`)
   whenever `onAuthStateChange` fires `SIGNED_IN`, and also once on initial mount if a session is
-  already restored. This is what makes Google OAuth's redirect-return flow sync correctly — it has
-  no interactive form to call `syncNow()` from directly, unlike the email sign-up/sign-in path in
-  `AccountSheet.tsx`, which still calls it explicitly too (for immediate "Syncing..." UI feedback;
-  the duplicate call this can cause is harmless since merges are idempotent).
-- **Google OAuth is wired into the UI** (`AccountSheet.tsx` "Continue with Google" button, calling
-  `authService.signInWithGoogle()`), but only functions once the Supabase project has the Google
-  provider enabled — see `docs/SUPABASE_SETUP.md` step 3. Until then the button will error, which
-  is expected and not a bug.
-- **Supabase project**: as of the 2026-09-11 platform-upgrade session, the project URL
-  `https://wqwfyqgrhyrjdjzigiop.supabase.co` was provided, but no working anon/publishable key
-  was supplied in that message, so `.env.local` has NOT been created and `isSupabaseConfigured` is
-  still `false` in this checkout. Do not assume this project is wired up without checking for
-  `.env.local` and verifying `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` yourself.
+  already restored — the latter has no interactive form to call `syncNow()` from directly, unlike
+  the email sign-up/sign-in path in `AccountSheet.tsx`, which still calls it explicitly too (for
+  immediate "Syncing..." UI feedback; the duplicate call this can cause is harmless since merges
+  are idempotent).
+- **Email/password is the only auth method.** Google OAuth was implemented and then explicitly
+  removed by the user (2026-09-11) — do not re-add a "Continue with Google" button or
+  `signInWithGoogle()` unless asked again.
+- **Supabase project**: `https://wqwfyqgrhyrjdjzigiop.supabase.co`, schema applied, `.env.local`
+  configured with a real publishable/anon key as of the 2026-09-11 session — `isSupabaseConfigured`
+  is `true` in this checkout. `.env.local` is git-ignored, so a fresh clone will have cloud sync
+  disabled until it's recreated (see `docs/SUPABASE_SETUP.md`).
 
 ## Visual identity & assets
 
@@ -134,7 +132,8 @@ A 62-section spec ("full product architecture, UX, Supabase, practice engine, le
 calendar, notifications, loops & stems") was applied partially, by explicit user agreement, not
 exhaustively — attempting all of it in one pass was rejected as an "uncontrolled rewrite" per the
 spec's own Section 58. Implemented this pass: brand/palette/icon assets (see "Visual identity &
-assets" above), Google OAuth UI + centralized sync-on-sign-in (see "Cloud sync architecture"
+assets" above), centralized sync-on-sign-in (see "Cloud sync architecture" above; Google OAuth was
+also added then explicitly removed the same day — see "Email/password is the only auth method"
 above). **Explicitly deferred, with a scope decision already made for each so it isn't re-litigated
 accidentally:**
 

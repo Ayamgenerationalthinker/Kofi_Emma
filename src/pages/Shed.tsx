@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
-import { ExternalLink, Search, WifiOff } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ExternalLink, Guitar, Search, WifiOff } from "lucide-react";
 import { KOFI_EMMA_VIDEOS, VIDEO_CATEGORIES, KOFI_EMMA_CHANNEL_URL, type KofiEmmaVideo } from "../data/kofiEmmaVideos";
 import { getVideoStudy } from "../services/videoStudyService";
 import { useLocalDbVersion } from "../hooks/useLocalDb";
@@ -70,6 +71,17 @@ export function Shed() {
         </div>
       )}
 
+      <Link
+        to="/shed-tracks"
+        className="flex items-center gap-3 rounded-xl border border-charcoal-700 bg-charcoal-900/50 p-4 hover:border-gold-500/50"
+      >
+        <Guitar className="h-6 w-6 shrink-0 text-gold-400" aria-hidden="true" />
+        <div>
+          <h2 className="font-bold">Shed Tracks</h2>
+          <p className="text-xs text-parchment/50">Full-band backing tracks. Mute the drums, loop a section, play along.</p>
+        </div>
+      </Link>
+
       <section>
         <h2 className="mb-2 text-xs uppercase tracking-widest text-gold-400">Featured Video</h2>
         <VideoCard video={featured} study={getVideoStudy(featured.youtubeId)} onOpen={() => setOpenVideo(featured)} />
@@ -136,7 +148,10 @@ export function Shed() {
         )}
       </section>
 
-      <VideoStudySheet video={openVideo} open={openVideo != null} onClose={() => setOpenVideo(null)} />
+      {/* Keyed by video id: opening a different video is a fresh mount, so
+          its saved study state loads cleanly and no unsaved edit from a
+          previously open video can leak into the next one. */}
+      <VideoStudySheet key={openVideo?.youtubeId ?? "none"} video={openVideo} open={openVideo != null} onClose={() => setOpenVideo(null)} />
     </div>
   );
 }

@@ -127,6 +127,17 @@ export interface VideoStudyRecord {
   updatedAt: string;
 }
 
+/**
+ * One unlocked achievement. Keyed by achievement id in
+ * `LocalDbShape.achievements` — presence of a key IS the unlock (no
+ * separate boolean), which is what makes unlocking idempotent by
+ * construction. `unlockedAt` is permanent once set and never rewritten.
+ */
+export interface AchievementUnlockRecord {
+  achievementId: string;
+  unlockedAt: string;
+}
+
 export interface LocalDbShape {
   schemaVersion: number;
   user: UserRecord | null;
@@ -140,4 +151,5 @@ export interface LocalDbShape {
   metronome: MetronomePreferencesRecord;
   videoStudy: Record<string, VideoStudyRecord>;
   onboardingProfile: OnboardingProfileRecord;
+  achievements: Record<string, AchievementUnlockRecord>;
 }

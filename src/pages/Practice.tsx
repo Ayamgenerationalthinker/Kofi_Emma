@@ -6,6 +6,8 @@ import { useLocalDbVersion } from "../hooks/useLocalDb";
 import { useImmersive } from "../context/ImmersiveContext";
 import { generateTodayLesson, readTodayLesson, startTodaySession, completeSession } from "../services/practicePlannerService";
 import { getProgressSummary } from "../services/progressService";
+import { checkAndUnlockAchievements } from "../services/achievementService";
+import { getAchievementDefinition, type AchievementId } from "../data/achievements";
 import { LessonPartRunner } from "../components/LessonPartRunner";
 import { ActionSheet } from "../components/ui/ActionSheet";
 import { useWakeLock } from "../hooks/useWakeLock";
@@ -36,6 +38,7 @@ export function Practice() {
   const [results, setResults] = useState<RecordAttemptResult[]>([]);
   const [startingBestBpm, setStartingBestBpm] = useState(0);
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false);
+  const [newlyUnlocked, setNewlyUnlocked] = useState<AchievementId[]>([]);
 
   useEffect(() => {
     setImmersive(typeof stage === "number");
@@ -65,15 +68,31 @@ export function Practice() {
 
   function finishSession() {
     if (sessionId) completeSession(sessionId);
+    setNewlyUnlocked(checkAndUnlockAchievements(timezone));
     wakeLock.release();
     setStage("summary");
   }
 
   // Section 23 (UX spec): leaving mid-shed is never framed as losing
-  // progress — everything already logged stays saved either way.
+  // progress — every part already finished stays saved either way (each
+  // one is recorded independently by LessonPartRunner as it happens, via
+  // recordAttempt, regardless of how the session as a whole ends).
+  //
+  // The session itself is only marked COMPLETED (which is what the streak
+  // and "minutes practiced" stats count) if at least one part was actually
+  // finished — bailing out at 0/4 parts must not count as a practiced day,
+  // and the minutes recorded reflect only the parts actually done, not the
+  // full planned session length.
   function confirmExit() {
     setExitConfirmOpen(false);
-    if (sessionId) completeSession(sessionId);
+    if (sessionId && results.length > 0) {
+      const minutesDone = lesson!.lessonParts.slice(0, results.length).reduce((sum, p) => sum + p.duration, 0);
+      completeSession(sessionId, minutesDone);
+      // Persisted silently here (no popup) — the exit flow is about
+      // leaving, not celebrating; the Achievements page reflects the
+      // unlock next time it's opened.
+      checkAndUnlockAchievements(timezone);
+    }
     wakeLock.release();
     setStage("intro");
   }
@@ -120,6 +139,7 @@ export function Practice() {
         exerciseCount={results.length}
         masteredCount={masteredCount}
         startingBestBpm={startingBestBpm}
+        newlyUnlocked={newlyUnlocked}
       />
     );
   }
@@ -176,16 +196,18 @@ function SummaryTile({ label, value }: { label: string; value: string | number }
 // estimate that could drift from what's actually stored. Section 24/25:
 // the completion screen names one concrete win rather than only listing
 // statistics.
-function SessionSummary({
+export function SessionSummary({
   totalMinutes,
   exerciseCount,
   masteredCount,
   startingBestBpm,
+  newlyUnlocked,
 }: {
   totalMinutes: number;
   exerciseCount: number;
   masteredCount: number;
   startingBestBpm: number;
+  newlyUnlocked: AchievementId[];
 }) {
   const { user } = useAppContext();
   useLocalDbVersion();
@@ -208,6 +230,34 @@ function SessionSummary({
         <p className="text-xs uppercase tracking-widest text-gold-400">Your Win</p>
         <p className="mt-1 text-parchment/80">{win}</p>
       </div>
+
+      {newlyUnlocked.length > 0 && (
+        <div className="mx-auto max-w-md space-y-2">
+          {newlyUnlocked.map((id) => {
+            const def = getAchievementDefinition(id);
+            if (!def) return null;
+            return (
+              <div key={id} className="flex items-center gap-3 rounded-xl border border-charcoal-700 bg-charcoal-900/50 p-3 text-left">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gold-500/50 text-gold-300">
+                  <Flame className="h-4 w-4" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-xs uppercase tracking-widest text-gold-400">Achievement Unlocked</p>
+                  <p className="text-sm font-bold">{def.title}</p>
+                </div>
+              </div>
+            );
+          })}
+          {/* This is the one moment an achievement is actually relevant to
+              the user, so it's the natural place to point at the full
+              Achievements page — not a permanent link on every completion
+              screen, which would be clutter on the far-more-common day with
+              nothing newly unlocked. */}
+          <Link to="/achievements" className="inline-flex items-center gap-1 text-sm font-medium text-gold-400 hover:text-gold-300">
+            See all achievements →
+          </Link>
+        </div>
+      )}
 
       <div className="mx-auto grid max-w-md grid-cols-2 gap-4">
         <SummaryTile label="Exercises" value={exerciseCount} />

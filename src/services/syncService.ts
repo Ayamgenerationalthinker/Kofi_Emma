@@ -5,8 +5,16 @@
 // know whether cloud sync exists on a given deployment.
 
 import { supabase, isSupabaseConfigured } from "../lib/supabase/client";
-import { getDb, mutate, type ProgressRecord, type AttemptRecord, type VideoStudyRecord, type UserRecord } from "../lib/localDb";
-import { mergeProgressMaps, mergeAttempts, mergeVideoStudyMaps } from "./syncMergeRules";
+import {
+  getDb,
+  mutate,
+  type ProgressRecord,
+  type AttemptRecord,
+  type VideoStudyRecord,
+  type UserRecord,
+  type AchievementUnlockRecord,
+} from "../lib/localDb";
+import { mergeProgressMaps, mergeAttempts, mergeVideoStudyMaps, mergeAchievementMaps } from "./syncMergeRules";
 import { AppError } from "../lib/errors";
 import { localDateKey } from "../lib/dates";
 
@@ -32,6 +40,21 @@ export function onSyncStatusChange(listener: (status: SyncStatus) => void): () =
 function requireClient() {
   if (!supabase) throw new AppError("CLOUD_SYNC_UNAVAILABLE", "Cloud sync isn't configured on this deployment.");
   return supabase;
+}
+
+/**
+ * The one place a Postgrest/Supabase error becomes an AppError for sync.
+ * The raw error (e.g. "invalid input syntax for type uuid", a PGRST code)
+ * is logged for debugging but never shown to the user — nothing practicing
+ * drums needs to see Postgres internals, and per CLAUDE.md's error-UX rule
+ * this must read like something a musician wrote, not a stack trace.
+ */
+function throwSyncError(raw: { message: string; code?: string }): never {
+  console.error("[syncService] cloud sync failed:", raw.code ?? "", raw.message);
+  throw new AppError(
+    "SYNC_ERROR",
+    "We couldn't sync your progress just now. Your practice is still saved on this device — we'll try again next time you're online."
+  );
 }
 
 // --- Row <-> LocalStorage record mapping -----------------------------------
@@ -123,18 +146,28 @@ function rowToVideo(row: { video_id: string; watched: boolean; favorite: boolean
   };
 }
 
+function achievementToRow(userId: string, a: AchievementUnlockRecord) {
+  return { user_id: userId, achievement_id: a.achievementId };
+}
+
+function rowToAchievement(row: { achievement_id: string; unlocked_at: string }): AchievementUnlockRecord {
+  return { achievementId: row.achievement_id, unlockedAt: row.unlocked_at };
+}
+
 // --- Pull / push -------------------------------------------------------------
 
 async function pullCloudState(userId: string) {
   const client = requireClient();
-  const [progressRes, attemptsRes, videoRes] = await Promise.all([
+  const [progressRes, attemptsRes, videoRes, achievementsRes] = await Promise.all([
     client.from("exercise_progress").select("*").eq("user_id", userId),
     client.from("practice_sessions").select("*").eq("user_id", userId),
     client.from("video_progress").select("*").eq("user_id", userId),
+    client.from("user_achievements").select("*").eq("user_id", userId),
   ]);
-  if (progressRes.error) throw new AppError("SYNC_ERROR", progressRes.error.message);
-  if (attemptsRes.error) throw new AppError("SYNC_ERROR", attemptsRes.error.message);
-  if (videoRes.error) throw new AppError("SYNC_ERROR", videoRes.error.message);
+  if (progressRes.error) throwSyncError(progressRes.error);
+  if (attemptsRes.error) throwSyncError(attemptsRes.error);
+  if (videoRes.error) throwSyncError(videoRes.error);
+  if (achievementsRes.error) throwSyncError(achievementsRes.error);
 
   const progress: Record<string, ProgressRecord> = {};
   for (const row of progressRes.data ?? []) progress[row.exercise_id] = rowToProgress(row);
@@ -144,27 +177,47 @@ async function pullCloudState(userId: string) {
   const videoStudy: Record<string, VideoStudyRecord> = {};
   for (const row of videoRes.data ?? []) videoStudy[row.video_id] = rowToVideo(row);
 
-  return { progress, attempts, videoStudy };
+  const achievements: Record<string, AchievementUnlockRecord> = {};
+  for (const row of achievementsRes.data ?? []) achievements[row.achievement_id] = rowToAchievement(row);
+
+  return { progress, attempts, videoStudy, achievements };
 }
 
-async function pushLocalState(userId: string, timezone: string, state: { progress: Record<string, ProgressRecord>; attempts: AttemptRecord[]; videoStudy: Record<string, VideoStudyRecord> }) {
+async function pushLocalState(
+  userId: string,
+  timezone: string,
+  state: {
+    progress: Record<string, ProgressRecord>;
+    attempts: AttemptRecord[];
+    videoStudy: Record<string, VideoStudyRecord>;
+    achievements: Record<string, AchievementUnlockRecord>;
+  }
+) {
   const client = requireClient();
 
   const progressRows = Object.values(state.progress).map((p) => progressToRow(userId, p));
   const attemptRows = state.attempts.map((a) => attemptToRow(userId, a, timezone));
   const videoRows = Object.values(state.videoStudy).map((v) => videoToRow(userId, v));
+  const achievementRows = Object.values(state.achievements).map((a) => achievementToRow(userId, a));
 
   if (progressRows.length > 0) {
     const { error } = await client.from("exercise_progress").upsert(progressRows, { onConflict: "user_id,exercise_id" });
-    if (error) throw new AppError("SYNC_ERROR", error.message);
+    if (error) throwSyncError(error);
   }
   if (attemptRows.length > 0) {
     const { error } = await client.from("practice_sessions").upsert(attemptRows, { onConflict: "client_attempt_id", ignoreDuplicates: true });
-    if (error) throw new AppError("SYNC_ERROR", error.message);
+    if (error) throwSyncError(error);
   }
   if (videoRows.length > 0) {
     const { error } = await client.from("video_progress").upsert(videoRows, { onConflict: "user_id,video_id" });
-    if (error) throw new AppError("SYNC_ERROR", error.message);
+    if (error) throwSyncError(error);
+  }
+  if (achievementRows.length > 0) {
+    // Achievements are append-only unlocks — ignoreDuplicates so a row
+    // already in the cloud never has its true unlocked_at overwritten by a
+    // later sync's server-assigned timestamp.
+    const { error } = await client.from("user_achievements").upsert(achievementRows, { onConflict: "user_id,achievement_id", ignoreDuplicates: true });
+    if (error) throwSyncError(error);
   }
 }
 
@@ -180,13 +233,14 @@ export async function pushProfile(userId: string, user: UserRecord, goals: strin
     },
     { onConflict: "id" }
   );
-  if (error) throw new AppError("SYNC_ERROR", error.message);
+  if (error) throwSyncError(error);
 }
 
 export interface SyncSummary {
   progressMerged: number;
   attemptsMerged: number;
   videosMerged: number;
+  achievementsMerged: number;
 }
 
 /**
@@ -201,11 +255,12 @@ export interface SyncSummary {
  * one.
  */
 export async function syncNow(userId: string): Promise<SyncSummary> {
-  if (!isSupabaseConfigured) return { progressMerged: 0, attemptsMerged: 0, videosMerged: 0 };
+  const empty = { progressMerged: 0, attemptsMerged: 0, videosMerged: 0, achievementsMerged: 0 };
+  if (!isSupabaseConfigured) return empty;
 
   if (typeof navigator !== "undefined" && !navigator.onLine) {
     setStatus("offline");
-    return { progressMerged: 0, attemptsMerged: 0, videosMerged: 0 };
+    return empty;
   }
 
   setStatus("syncing");
@@ -216,11 +271,13 @@ export async function syncNow(userId: string): Promise<SyncSummary> {
     const mergedProgress = mergeProgressMaps(local.progress, cloud.progress);
     const mergedAttempts = mergeAttempts(local.attempts, cloud.attempts);
     const mergedVideoStudy = mergeVideoStudyMaps(local.videoStudy, cloud.videoStudy);
+    const mergedAchievements = mergeAchievementMaps(local.achievements, cloud.achievements);
 
     mutate((db) => {
       db.progress = mergedProgress;
       db.attempts = mergedAttempts;
       db.videoStudy = mergedVideoStudy;
+      db.achievements = mergedAchievements;
     });
 
     if (local.user) await pushProfile(userId, local.user);
@@ -228,6 +285,7 @@ export async function syncNow(userId: string): Promise<SyncSummary> {
       progress: mergedProgress,
       attempts: mergedAttempts,
       videoStudy: mergedVideoStudy,
+      achievements: mergedAchievements,
     });
 
     setStatus("synced");
@@ -235,6 +293,7 @@ export async function syncNow(userId: string): Promise<SyncSummary> {
       progressMerged: Object.keys(mergedProgress).length,
       attemptsMerged: mergedAttempts.length,
       videosMerged: Object.keys(mergedVideoStudy).length,
+      achievementsMerged: Object.keys(mergedAchievements).length,
     };
   } catch (err) {
     setStatus("error");

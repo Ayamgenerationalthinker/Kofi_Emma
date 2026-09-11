@@ -26,20 +26,7 @@ otherwise.
    `auth.uid() = user_id` policies so a signed-in user can only ever touch their own rows.
 4. The script is idempotent — safe to re-run if you change it later.
 
-## 3. (Optional) Enable Google sign-in
-
-The app calls `signInWithGoogle()` (`src/services/authService.ts`), which uses Supabase's OAuth
-flow. To make this work:
-
-1. In the Supabase Dashboard: **Authentication → Providers → Google** → enable it.
-2. Follow Supabase's instructions to create a Google OAuth client ID/secret and paste them in.
-3. Under **Authentication → URL Configuration**, add your app's deployed URL (and
-   `http://localhost:5173` for local dev) to the redirect allow-list.
-
-If you skip this, email/password sign-up and sign-in still work fully — the Google button (if you
-add one to the UI) will simply error until this is configured.
-
-## 4. Set environment variables
+## 3. Set environment variables
 
 Copy `.env.example` to `.env` and fill in the two values from step 1:
 
@@ -54,7 +41,7 @@ startup/build time.
 **On Vercel** (or any host): add both as project environment variables in the dashboard, not by
 committing `.env` — `.env` is gitignored for exactly this reason.
 
-## 5. Regenerate types (recommended once the project exists)
+## 4. Regenerate types (recommended once the project exists)
 
 `src/lib/supabase/database.types.ts` was hand-written to match `supabase/schema.sql` exactly, since
 no live project existed while building this. Once your project exists, regenerate it for a

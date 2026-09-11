@@ -1236,7 +1236,12 @@ function computePrerequisiteIds(exerciseId: string): string[] {
 export const EXERCISES: CurriculumExercise[] = PHASE_EXERCISE_GROUPS.flat().map((def) => ({
   id: def.id,
   phaseId: `phase-${def.phaseNumber}`,
-  phaseNumber: def.phaseNumber,
+  // `def.phaseNumber` (1-4) is only the source array's 1-indexed group
+  // number, used to build `phaseId`. The exercise's own `phaseNumber` field
+  // must match `CurriculumPhase.number` (0-indexed "Level 0-3", see
+  // PHASES below) since that's what callers (the validator, sort
+  // comparators) compare it against.
+  phaseNumber: PHASES.find((p) => p.id === `phase-${def.phaseNumber}`)!.number,
   name: def.name,
   slug: def.slug,
   description: def.description,

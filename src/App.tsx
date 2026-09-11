@@ -14,6 +14,9 @@ import { Progress } from "./pages/Progress";
 import { CalendarPage } from "./pages/CalendarPage";
 import { Settings } from "./pages/Settings";
 import { Shed } from "./pages/Shed";
+import { ShedTracks } from "./pages/ShedTracks";
+import { ShedTrackDetail } from "./pages/ShedTrackDetail";
+import { Achievements } from "./pages/Achievements";
 import { NotFound } from "./pages/NotFound";
 import { useNotificationScheduler } from "./hooks/useNotificationScheduler";
 import { ensureProgressInitialized } from "./services/curriculumService";
@@ -82,9 +85,12 @@ export default function App() {
           <Route path="/curriculum/:exerciseId" element={<ExerciseDetail />} />
           <Route path="/handbook" element={<Navigate to="/curriculum" replace />} />
           <Route path="/shed" element={<Shed />} />
+          <Route path="/shed-tracks" element={<ShedTracks />} />
+          <Route path="/shed-tracks/:trackId" element={<ShedTrackDetail />} />
           <Route path="/metronome" element={<Metronome />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/achievements" element={<Achievements />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/onboarding" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFound />} />

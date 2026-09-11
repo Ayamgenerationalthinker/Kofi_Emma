@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, ListMusic, BookOpen, Timer, LineChart, CalendarDays, Settings as SettingsIcon, Flame, AlertTriangle } from "lucide-react";
+import { LayoutDashboard, ListMusic, BookOpen, Timer, LineChart, CalendarDays, Settings as SettingsIcon, Flame, AlertTriangle, Award, Guitar } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
 import { useImmersive } from "../context/ImmersiveContext";
 import { useLocalDbVersion } from "../hooks/useLocalDb";
@@ -11,7 +11,9 @@ const DESKTOP_NAV_ITEMS = [
   { to: "/practice", label: "Practice", icon: ListMusic },
   { to: "/curriculum", label: "Learn", icon: BookOpen },
   { to: "/shed", label: "Shed", icon: Flame },
+  { to: "/shed-tracks", label: "Tracks", icon: Guitar },
   { to: "/progress", label: "Progress", icon: LineChart },
+  { to: "/achievements", label: "Achievements", icon: Award },
   { to: "/metronome", label: "Metronome", icon: Timer },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
@@ -55,13 +57,30 @@ export function Layout() {
               Level {state.currentPhaseNumber}
             </span>
           </div>
-          {!storageAvailable && (
-            <span className="flex items-center gap-1.5 rounded-full border border-amber-600/50 bg-amber-950/40 px-2.5 py-1 text-[11px] text-amber-300">
-              <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">Storage blocked — progress won't be saved</span>
-              <span className="sm:hidden">Storage blocked</span>
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {!storageAvailable && (
+              <span className="flex items-center gap-1.5 rounded-full border border-amber-600/50 bg-amber-950/40 px-2.5 py-1 text-[11px] text-amber-300">
+                <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="hidden sm:inline">Storage blocked — progress won't be saved</span>
+                <span className="sm:hidden">Storage blocked</span>
+              </span>
+            )}
+            {/* Settings/Metronome/Calendar are also in DESKTOP_NAV_ITEMS below,
+                but that row is hidden below the md breakpoint — without this,
+                a phone user (the primary audience) would have no way to ever
+                reach Settings at all. */}
+            <NavLink
+              to="/settings"
+              aria-label="Settings"
+              className={({ isActive }) =>
+                ["flex h-9 w-9 items-center justify-center rounded-full", isActive ? "text-gold-300" : "text-parchment/60 hover:text-parchment"].join(
+                  " "
+                )
+              }
+            >
+              <SettingsIcon className="h-5 w-5" aria-hidden="true" />
+            </NavLink>
+          </div>
         </div>
         <nav aria-label="Primary" className="hidden border-t border-charcoal-800 md:block">
           <div className="mx-auto flex max-w-6xl gap-1 px-4">

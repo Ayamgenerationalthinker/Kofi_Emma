@@ -26,15 +26,6 @@ export async function signInWithEmail(email: string, password: string): Promise<
   return data.user;
 }
 
-export async function signInWithGoogle(): Promise<void> {
-  const client = requireSupabase();
-  const { error } = await client.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: window.location.origin },
-  });
-  if (error) throw new AppError("AUTH_ERROR", error.message);
-}
-
 export async function signOut(): Promise<void> {
   const client = requireSupabase();
   const { error } = await client.auth.signOut();

@@ -12,7 +12,7 @@ describe("syncService — guest mode (Supabase not configured)", () => {
 
   it("syncNow() is a safe no-op — resolves with a zeroed summary rather than throwing", async () => {
     const summary = await syncNow("fake-user-id");
-    expect(summary).toEqual({ progressMerged: 0, attemptsMerged: 0, videosMerged: 0 });
+    expect(summary).toEqual({ progressMerged: 0, attemptsMerged: 0, videosMerged: 0, achievementsMerged: 0 });
   });
 
   it("pushProfile rejects with CLOUD_SYNC_UNAVAILABLE rather than crashing", async () => {

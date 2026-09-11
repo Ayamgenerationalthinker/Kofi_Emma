@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Heart } from "lucide-react";
 import { ActionSheet } from "../ui/ActionSheet";
 import { VideoEmbed } from "./VideoEmbed";
@@ -21,20 +21,17 @@ const NOTICE_OPTIONS = [
   "Independence",
 ];
 
+// Callers (Shed.tsx) key this component by `video.youtubeId`, so opening a
+// different video is a fresh mount rather than the same instance being
+// reused — these lazy initializers read that video's saved study state
+// once, at mount, which is what a reset-on-prop-change effect would have
+// produced anyway, without needing the effect at all.
 export function VideoStudySheet({ video, open, onClose }: { video: KofiEmmaVideo | null; open: boolean; onClose: () => void }) {
-  const [notedAspects, setNotedAspects] = useState<string[]>([]);
-  const [notes, setNotes] = useState("");
-  const [favorite, setFavorite] = useState(false);
+  const study = video ? getVideoStudy(video.youtubeId) : null;
+  const [notedAspects, setNotedAspects] = useState<string[]>(study?.notedAspects ?? []);
+  const [notes, setNotes] = useState(study?.notes ?? "");
+  const [favorite, setFavorite] = useState(study?.favorite ?? false);
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    if (!video) return;
-    const study = getVideoStudy(video.youtubeId);
-    setNotedAspects(study.notedAspects);
-    setNotes(study.notes);
-    setFavorite(study.favorite);
-    setSaved(false);
-  }, [video]);
 
   if (!video) return null;
 

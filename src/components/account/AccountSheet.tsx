@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Cloud, CloudOff, LogOut } from "lucide-react";
 import { ActionSheet } from "../ui/ActionSheet";
 import { useAuth } from "../../context/AuthContext";
-import { signInWithEmail, signUpWithEmail, signInWithGoogle, signOut, requestPasswordReset } from "../../services/authService";
+import { signInWithEmail, signUpWithEmail, signOut, requestPasswordReset } from "../../services/authService";
 import { syncNow } from "../../services/syncService";
 import { AppError } from "../../lib/errors";
 
@@ -52,19 +52,6 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
       setMessage("Password reset email sent.");
     } catch (err) {
       setMessage(err instanceof AppError ? err.message : "Could not send reset email.");
-    }
-  }
-
-  async function handleGoogleSignIn() {
-    setBusy(true);
-    setMessage(null);
-    try {
-      // Redirects away from the app; the sync-on-sign-in call happens in
-      // AuthContext (SIGNED_IN event) after the redirect returns, not here.
-      await signInWithGoogle();
-    } catch (err) {
-      setMessage(err instanceof AppError ? err.message : "Could not start Google sign-in.");
-      setBusy(false);
     }
   }
 
@@ -187,21 +174,6 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
             </button>
           )}
         </form>
-
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-charcoal-700" />
-          <span className="text-xs text-parchment/40">or</span>
-          <div className="h-px flex-1 bg-charcoal-700" />
-        </div>
-
-        <button
-          type="button"
-          onClick={handleGoogleSignIn}
-          disabled={busy}
-          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-md border border-charcoal-600 py-2.5 text-sm font-semibold text-parchment/80 hover:border-gold-500 disabled:opacity-50"
-        >
-          Continue with Google
-        </button>
       </div>
     </ActionSheet>
   );

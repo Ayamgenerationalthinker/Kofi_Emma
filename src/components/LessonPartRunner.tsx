@@ -40,16 +40,18 @@ export function LessonPartRunner({
     initialBpm: part.targetBpm,
   });
 
-  useEffect(() => {
-    setPhase("countdown");
-    setCountdown(3);
-    setResult(null);
-    setSubmitError(null);
-  }, [part.exerciseId]);
+  // No reset-on-part-change effect here: Practice.tsx keys this component
+  // by `activePart.exerciseId + stage`, so a new part is a fresh mount —
+  // the useState initializers above already start at "countdown"/3/null/
+  // null, which is exactly what a reset would have produced.
 
   useEffect(() => {
     if (phase !== "countdown") return;
     if (countdown <= 0) {
+      // This is the countdown timer's own state-machine transition
+      // (3-2-1-Go → play), not a "reset state when a prop changed" effect;
+      // there's no key-based remount equivalent for a timer reaching zero.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPhase("play");
       return;
     }

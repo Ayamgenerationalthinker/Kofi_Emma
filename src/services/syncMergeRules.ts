@@ -16,8 +16,12 @@
 //     watchedAt takes the earliest non-null value; favorite/notedAspects/
 //     notes all take the side with the later updatedAt ("latest write
 //     wins" for genuinely user-edited fields, per the spec).
+//   - achievements: union of unlocked ids (once unlocked, always unlocked
+//     — an achievement is never revoked by a merge); unlockedAt takes the
+//     earliest value (the true first-earned moment, same reasoning as
+//     masteredAt above).
 
-import type { ProgressRecord, AttemptRecord, VideoStudyRecord, ProgressStatus } from "../lib/localDb";
+import type { ProgressRecord, AttemptRecord, VideoStudyRecord, ProgressStatus, AchievementUnlockRecord } from "../lib/localDb";
 
 const STATUS_RANK: Record<ProgressStatus, number> = { LOCKED: 0, AVAILABLE: 1, REPEAT: 2, IN_PROGRESS: 2, MASTERED: 3 };
 
@@ -81,6 +85,20 @@ export function mergeVideoStudyMaps(
   for (const [videoId, cloudRecord] of Object.entries(cloud)) {
     const localRecord = merged[videoId];
     merged[videoId] = localRecord ? mergeVideoStudyRecord(localRecord, cloudRecord) : cloudRecord;
+  }
+  return merged;
+}
+
+export function mergeAchievementMaps(
+  local: Record<string, AchievementUnlockRecord>,
+  cloud: Record<string, AchievementUnlockRecord>
+): Record<string, AchievementUnlockRecord> {
+  const merged: Record<string, AchievementUnlockRecord> = { ...local };
+  for (const [id, cloudRecord] of Object.entries(cloud)) {
+    const localRecord = merged[id];
+    merged[id] = localRecord
+      ? { achievementId: id, unlockedAt: [localRecord.unlockedAt, cloudRecord.unlockedAt].sort()[0] }
+      : cloudRecord;
   }
   return merged;
 }

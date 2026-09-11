@@ -45,9 +45,15 @@ export function useMetronome({ steps, subdivision, initialBpm, initialVolume = 8
   }, [bpm, subdivision, isRunning]);
 
   useEffect(() => {
+    // Copied to locals: metronomeRef/audioEngineRef are set once (from the
+    // lazy useState initializers above) and never reassigned, but reading
+    // `.current` directly inside the returned cleanup trips the linter's
+    // generic "ref may have changed by unmount" heuristic.
+    const engine = metronomeRef.current;
+    const audio = audioEngineRef.current;
     return () => {
-      metronomeRef.current?.stop();
-      audioEngineRef.current?.dispose();
+      engine?.stop();
+      audio?.dispose();
     };
   }, []);
 

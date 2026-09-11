@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { Download, Upload, Trash2, BellRing, ExternalLink, Cloud, CloudOff } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Download, Upload, Trash2, BellRing, ExternalLink, Cloud, CloudOff, Timer, CalendarDays, Award } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
 import { useLocalDbVersion } from "../hooks/useLocalDb";
@@ -104,6 +105,32 @@ export function Settings() {
             <CloudOff className="h-4 w-4 shrink-0" /> Cloud sync isn't configured on this deployment. Your progress still saves on this device.
           </p>
         )}
+      </SettingsSection>
+
+      {/* On mobile the bottom nav only has room for Home/Practice/Learn/Shed/
+          Progress — Metronome and Calendar have no other entry point there,
+          so this is their only reachable link on a phone. */}
+      <SettingsSection title="Tools">
+        <div className="flex flex-wrap gap-3">
+          <Link
+            to="/metronome"
+            className="flex min-h-[44px] items-center gap-2 rounded-md border border-charcoal-600 px-4 py-2 text-sm hover:border-gold-500"
+          >
+            <Timer className="h-4 w-4" /> Metronome
+          </Link>
+          <Link
+            to="/calendar"
+            className="flex min-h-[44px] items-center gap-2 rounded-md border border-charcoal-600 px-4 py-2 text-sm hover:border-gold-500"
+          >
+            <CalendarDays className="h-4 w-4" /> Calendar Export
+          </Link>
+          <Link
+            to="/achievements"
+            className="flex min-h-[44px] items-center gap-2 rounded-md border border-charcoal-600 px-4 py-2 text-sm hover:border-gold-500"
+          >
+            <Award className="h-4 w-4" /> Achievements
+          </Link>
+        </div>
       </SettingsSection>
 
       <SettingsSection title="Practice">
@@ -271,7 +298,7 @@ export function Settings() {
 
       <AccountSheet open={accountSheetOpen} onClose={() => setAccountSheetOpen(false)} />
 
-      <style>{`.input { width: 100%; border-radius: 0.375rem; border: 1px solid #38383E; background: #0B0B0C; padding: 0.5rem 0.75rem; }`}</style>
+      <style>{`.input { width: 100%; border-radius: 0.375rem; border: 1px solid #38383E; background: #0B0D0F; padding: 0.5rem 0.75rem; }`}</style>
     </div>
   );
 }

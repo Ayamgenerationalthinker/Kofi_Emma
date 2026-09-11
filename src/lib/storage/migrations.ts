@@ -16,10 +16,11 @@ import type {
   BpmRecordEntry,
   VideoStudyRecord,
   OnboardingProfileRecord,
+  AchievementUnlockRecord,
 } from "./types";
 import { LEGACY_STORAGE_KEYS } from "./keys";
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export function defaultSettings(): UserSettingsRecord {
   return {
@@ -58,6 +59,7 @@ export function defaultDb(): LocalDbShape {
     metronome: defaultMetronomePreferences(),
     videoStudy: {},
     onboardingProfile: defaultOnboardingProfile(),
+    achievements: {},
   };
 }
 
@@ -100,6 +102,8 @@ export function migrate(raw: unknown): LocalDbShape {
     videoStudy: asRecord<VideoStudyRecord>(data.videoStudy, defaults.videoStudy),
     // Added in schema v3 — same story.
     onboardingProfile: { ...defaults.onboardingProfile, ...asObject(data.onboardingProfile) } as OnboardingProfileRecord,
+    // Added in schema v4 — same story.
+    achievements: asRecord<AchievementUnlockRecord>(data.achievements, defaults.achievements),
   };
 }
 

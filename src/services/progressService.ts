@@ -77,6 +77,17 @@ function rangeStartIso(days: number | "all"): string | null {
   return d.toISOString();
 }
 
+/** The most recent completed sessions, newest first — for a compact "recent practice" list. */
+export function getRecentSessions(limit: number) {
+  const db = getDb();
+  return db.sessions
+    .filter((s) => s.status === "COMPLETED")
+    .slice()
+    .sort((a, b) => (b.completedAt ?? "").localeCompare(a.completedAt ?? ""))
+    .slice(0, limit)
+    .map((s) => ({ date: s.date, totalMinutes: s.totalMinutes, completedAt: s.completedAt }));
+}
+
 export function getBpmHistory(range: RangeFilter) {
   const start = rangeStartIso(range.days);
   const db = getDb();

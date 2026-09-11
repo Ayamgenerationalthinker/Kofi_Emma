@@ -32,10 +32,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   function syncOnceFor(userId: string) {
     if (syncedUserIdRef.current === userId) return;
     syncedUserIdRef.current = userId;
-    // Fire-and-forget: this is a background convenience sync (covers
-    // Google OAuth's redirect return and a restored session on reload,
-    // neither of which goes through AccountSheet's own explicit syncNow()
-    // call). Errors surface via syncService's status listeners, not here.
+    // Fire-and-forget: this is a background convenience sync covering a
+    // restored session on reload, which doesn't go through AccountSheet's
+    // own explicit syncNow() call. Errors surface via syncService's status
+    // listeners, not here.
     void syncNow(userId);
   }
 

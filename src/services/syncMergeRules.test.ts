@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { mergeProgressRecord, mergeProgressMaps, mergeAttempts, mergeVideoStudyRecord, mergeVideoStudyMaps } from "./syncMergeRules";
-import type { ProgressRecord, AttemptRecord, VideoStudyRecord } from "../lib/localDb";
+import { mergeProgressRecord, mergeProgressMaps, mergeAttempts, mergeVideoStudyRecord, mergeVideoStudyMaps, mergeAchievementMaps } from "./syncMergeRules";
+import type { ProgressRecord, AttemptRecord, VideoStudyRecord, AchievementUnlockRecord } from "../lib/localDb";
 
 function progress(overrides: Partial<ProgressRecord>): ProgressRecord {
   return {
@@ -117,5 +117,26 @@ describe("mergeVideoStudyRecord — watched is sticky, favorite/notes follow the
     const merged = mergeVideoStudyMaps(local, cloud);
     expect(Object.keys(merged)).toContain("Cd25CPj4Ii4");
     expect(Object.keys(merged)).toContain("Rt_wN-mKM_0");
+  });
+});
+
+describe("mergeAchievementMaps — unlocks are permanent and never revoked", () => {
+  it("keeps an achievement unlocked locally even if the cloud side doesn't have it yet", () => {
+    const local: Record<string, AchievementUnlockRecord> = { first_practice: { achievementId: "first_practice", unlockedAt: "2026-01-01T00:00:00.000Z" } };
+    const merged = mergeAchievementMaps(local, {});
+    expect(merged.first_practice).toBeDefined();
+  });
+
+  it("adds an achievement unlocked only on the cloud side (e.g. unlocked on another device)", () => {
+    const cloud: Record<string, AchievementUnlockRecord> = { streak_7: { achievementId: "streak_7", unlockedAt: "2026-01-01T00:00:00.000Z" } };
+    const merged = mergeAchievementMaps({}, cloud);
+    expect(merged.streak_7).toBeDefined();
+  });
+
+  it("keeps the earliest unlockedAt when both sides have the same achievement", () => {
+    const local: Record<string, AchievementUnlockRecord> = { first_groove: { achievementId: "first_groove", unlockedAt: "2026-02-01T00:00:00.000Z" } };
+    const cloud: Record<string, AchievementUnlockRecord> = { first_groove: { achievementId: "first_groove", unlockedAt: "2026-01-10T00:00:00.000Z" } };
+    const merged = mergeAchievementMaps(local, cloud);
+    expect(merged.first_groove.unlockedAt).toBe("2026-01-10T00:00:00.000Z");
   });
 });
