@@ -1,22 +1,24 @@
 import { NavLink } from "react-router-dom";
-import { Home, ListMusic, BookOpen, Flame, LineChart } from "lucide-react";
+import { Home, ListMusic, BookOpen, Flame, LineChart, Settings } from "lucide-react";
 
 // Section 9/109: fixed mobile bottom navigation, always visible while
-// navigating. Curriculum and the Handbook both live under "Learn" so five
-// labeled items stay comfortably tap-sized instead of cramming in a sixth.
+// navigating. Curriculum and the Handbook both live under "Learn". Settings
+// lives here (not just the desktop-only top nav row) because it's the only
+// mobile entry point to it — there's no other Settings link on a phone.
 const NAV_ITEMS = [
   { to: "/", label: "Home", icon: Home },
   { to: "/practice", label: "Practice", icon: ListMusic },
   { to: "/curriculum", label: "Learn", icon: BookOpen },
   { to: "/shed", label: "Shed", icon: Flame },
   { to: "/progress", label: "Progress", icon: LineChart },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function BottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-charcoal-800 bg-charcoal-950/95 backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-charcoal-800 bg-charcoal-950/95 backdrop-blur"
       style={{ paddingBottom: "var(--safe-area-bottom)" }}
     >
       {NAV_ITEMS.map(({ to, label, icon: Icon }) => (

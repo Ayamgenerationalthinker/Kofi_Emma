@@ -27,13 +27,27 @@ export function AccountSheet({ open, onClose }: { open: boolean; onClose: () => 
     setBusy(true);
     setMessage(null);
     try {
-      const authedUser = mode === "signup" ? await signUpWithEmail(email, password) : await signInWithEmail(email, password);
-      if (authedUser) {
-        setMessage("Syncing your progress...");
-        await syncNow(authedUser.id);
-        setMessage("You're all set — your progress is backed up.");
+      if (mode === "signup") {
+        // Supabase returns a non-null `user` even when "Confirm email" is
+        // on (its default) — `session` is what actually tells us whether
+        // this account can be used yet. Syncing (or claiming success)
+        // before that would fail: every table's RLS policy requires a
+        // real signed-in session, which doesn't exist until confirmation.
+        const { user, session } = await signUpWithEmail(email, password);
+        if (session && user) {
+          setMessage("Syncing your progress...");
+          await syncNow(user.id);
+          setMessage("You're all set — your progress is backed up.");
+        } else {
+          setMessage("Check your email to confirm your account, then sign in.");
+        }
       } else {
-        setMessage("Check your email to confirm your account, then sign in.");
+        const user = await signInWithEmail(email, password);
+        if (user) {
+          setMessage("Syncing your progress...");
+          await syncNow(user.id);
+          setMessage("You're all set — your progress is backed up.");
+        }
       }
     } catch (err) {
       setMessage(err instanceof AppError ? err.message : "Something went wrong.");

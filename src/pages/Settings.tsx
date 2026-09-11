@@ -213,22 +213,7 @@ export function Settings() {
       </SettingsSection>
 
       <SettingsSection title="Theme">
-        <div className="flex gap-2">
-          {(["light", "dark", "system"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => updateSettings({ theme: t })}
-              aria-pressed={settings.theme === t}
-              className={[
-                "rounded-md border px-4 py-2 text-sm capitalize",
-                settings.theme === t ? "border-gold-500 bg-gold-500/10 text-gold-300" : "border-charcoal-600 text-parchment/70",
-              ].join(" ")}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+        <p className="text-sm text-parchment/60">Abele Drums Coach currently supports a dark theme only.</p>
       </SettingsSection>
 
       {saveMessage && <p className="text-sm text-parchment/60">{saveMessage}</p>}
