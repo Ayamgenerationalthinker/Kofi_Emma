@@ -1,19 +1,42 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, ListMusic, BookOpen, Timer, LineChart, CalendarDays, Settings as SettingsIcon, AlertTriangle } from "lucide-react";
+import { LayoutDashboard, ListMusic, BookOpen, Timer, LineChart, CalendarDays, Settings as SettingsIcon, Flame, AlertTriangle } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
+import { useImmersive } from "../context/ImmersiveContext";
+import { useLocalDbVersion } from "../hooks/useLocalDb";
+import { getCurriculumState } from "../services/curriculumService";
+import { BottomNav } from "./navigation/BottomNav";
 
-const NAV_ITEMS = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/practice", label: "Today's Practice", icon: ListMusic },
-  { to: "/curriculum", label: "Curriculum", icon: BookOpen },
-  { to: "/metronome", label: "Metronome", icon: Timer },
+const DESKTOP_NAV_ITEMS = [
+  { to: "/", label: "Home", icon: LayoutDashboard },
+  { to: "/practice", label: "Practice", icon: ListMusic },
+  { to: "/curriculum", label: "Learn", icon: BookOpen },
+  { to: "/shed", label: "Shed", icon: Flame },
   { to: "/progress", label: "Progress", icon: LineChart },
+  { to: "/metronome", label: "Metronome", icon: Timer },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
+// Section 71: a compact mobile header (name + current level, no wasted
+// vertical space) plus a fixed bottom nav on mobile. A desktop-width top
+// nav row is kept for larger screens where a thumb-reach bottom bar makes
+// less sense (section 7: mobile drives the design, desktop is secondary —
+// not absent).
 export function Layout() {
   const { storageAvailable } = useAppContext();
+  const { immersive } = useImmersive();
+  useLocalDbVersion();
+  const state = getCurriculumState();
+
+  if (immersive) {
+    return (
+      <div className="min-h-screen bg-charcoal-950 text-parchment">
+        <main className="mx-auto max-w-2xl px-4 py-4" style={{ paddingTop: "calc(1rem + var(--safe-area-top))" }}>
+          <Outlet />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-charcoal-950 text-parchment">
@@ -21,25 +44,32 @@ export function Layout() {
         Skip to content
       </a>
 
-      <header className="sticky top-0 z-40 border-b border-charcoal-800 bg-charcoal-950/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <div className="flex flex-col leading-tight">
-            <span className="font-bold tracking-tight">Gospel Drum Coach</span>
-            <span className="text-xs text-gold-400/80">The Kofi Emma Method</span>
+      <header
+        className="sticky top-0 z-40 border-b border-charcoal-800 bg-charcoal-950/95 backdrop-blur"
+        style={{ paddingTop: "var(--safe-area-top)" }}
+      >
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5">
+          <div className="flex items-baseline gap-2 leading-tight">
+            <span className="font-bold tracking-tight">Abele Drums Coach</span>
+            <span className="rounded-full border border-gold-600/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold-300">
+              Level {state.currentPhaseNumber}
+            </span>
           </div>
           {!storageAvailable && (
-            <span className="flex items-center gap-1.5 rounded-full border border-amber-600/50 bg-amber-950/40 px-3 py-1 text-xs text-amber-300">
+            <span className="flex items-center gap-1.5 rounded-full border border-amber-600/50 bg-amber-950/40 px-2.5 py-1 text-[11px] text-amber-300">
               <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-              Storage blocked — progress won't be saved
+              <span className="hidden sm:inline">Storage blocked — progress won't be saved</span>
+              <span className="sm:hidden">Storage blocked</span>
             </span>
           )}
         </div>
-        <nav aria-label="Primary" className="hidden md:block border-t border-charcoal-800">
+        <nav aria-label="Primary" className="hidden border-t border-charcoal-800 md:block">
           <div className="mx-auto flex max-w-6xl gap-1 px-4">
-            {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+            {DESKTOP_NAV_ITEMS.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
+                end={to === "/"}
                 className={({ isActive }) =>
                   [
                     "flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-medium transition-colors",
@@ -59,20 +89,9 @@ export function Layout() {
         <Outlet />
       </main>
 
-      <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-charcoal-800 bg-charcoal-950/95 backdrop-blur md:hidden">
-        {NAV_ITEMS.slice(0, 4).map(({ to, label, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              ["flex flex-col items-center gap-1 py-2 text-[11px]", isActive ? "text-gold-300" : "text-parchment/50"].join(" ")
-            }
-          >
-            <Icon className="h-5 w-5" aria-hidden="true" />
-            {label.split(" ")[0]}
-          </NavLink>
-        ))}
-      </nav>
+      <div className="md:hidden">
+        <BottomNav />
+      </div>
     </div>
   );
 }

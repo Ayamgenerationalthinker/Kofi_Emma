@@ -32,7 +32,7 @@ describe("Dashboard page", () => {
   it("renders the current phase, stats, and a start-practice link", async () => {
     renderDashboard();
     await waitFor(() => expect(screen.getByText(/START TODAY'S PRACTICE/i)).toBeInTheDocument());
-    expect(screen.getByText("The Foundation & Highlife Pocket")).toBeInTheDocument();
+    expect(screen.getByText("Absolute Beginner")).toBeInTheDocument();
     expect(screen.getByText("Single Stroke Control")).toBeInTheDocument(); // next milestone, before anything is mastered
   });
 

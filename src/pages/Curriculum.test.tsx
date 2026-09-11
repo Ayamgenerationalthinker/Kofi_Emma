@@ -17,11 +17,11 @@ describe("Curriculum page", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/Master all Phase 1 prerequisites/)).toBeInTheDocument();
-    expect(screen.getAllByText(/Linear Subdivisions & Praise Medleys/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Master all Level 0 prerequisites/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Intermediate/).length).toBeGreaterThan(0);
   });
 
-  it("shows the first phase-1 exercise as available once expanded", async () => {
+  it("shows the first level-0 exercise as available once expanded", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter>
@@ -29,7 +29,7 @@ describe("Curriculum page", () => {
       </MemoryRouter>
     );
 
-    await user.click(screen.getByText(/Phase 1:/).closest("button")!);
+    await user.click(screen.getByText(/Level 0:/).closest("button")!);
     expect(await screen.findByText("Single Stroke Control")).toBeInTheDocument();
     expect(screen.getByText("Available")).toBeInTheDocument();
   });

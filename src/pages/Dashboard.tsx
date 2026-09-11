@@ -44,8 +44,8 @@ export function Dashboard() {
   return (
     <div className="space-y-8">
       <section className="rounded-2xl border border-gold-600/30 bg-gradient-to-br from-charcoal-900 to-charcoal-800 p-6">
-        <p className="text-xs uppercase tracking-widest text-gold-400">Phase {currentPhase?.number ?? 1}</p>
-        <h1 className="mt-1 text-2xl font-black">{currentPhase?.title ?? "The Foundation & Highlife Pocket"}</h1>
+        <p className="text-xs uppercase tracking-widest text-gold-400">Level {currentPhase?.number ?? 0}</p>
+        <h1 className="mt-1 text-2xl font-black">{currentPhase?.title ?? "Absolute Beginner"}</h1>
         <p className="mt-3 max-w-2xl text-parchment/70">{buildCoachMessage(progress, lesson)}</p>
 
         <Link
@@ -64,7 +64,7 @@ export function Dashboard() {
             <div key={phase.id} className="rounded-xl border border-charcoal-700 bg-charcoal-900/50 p-4">
               <div className="mb-2 flex items-center justify-between">
                 <span className="font-semibold">
-                  Phase {phase.number}: {phase.title}
+                  Level {phase.number}: {phase.title}
                 </span>
                 {phase.status === "LOCKED" && <Lock className="h-4 w-4 text-parchment/40" aria-label="Locked" />}
               </div>

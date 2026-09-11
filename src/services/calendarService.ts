@@ -43,7 +43,7 @@ function buildEvent(params: {
   const end = new Date(params.start.getTime() + params.durationMinutes * 60000);
   const lines = [
     "BEGIN:VEVENT",
-    `UID:${params.uidSeed}@gospel-drum-coach.local`,
+    `UID:${params.uidSeed}@abeledrumscoach.local`,
     `DTSTAMP:${now}`,
     `DTSTART:${formatIcsUtc(params.start)}`,
     `DTEND:${formatIcsUtc(end)}`,
@@ -65,7 +65,7 @@ function wrapCalendar(events: string[]): string {
     [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//Gospel Drum Coach//The Kofi Emma Method//EN",
+      "PRODID:-//Kofi Emma//Abele Drums Coach//EN",
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       ...events,
@@ -84,13 +84,13 @@ export function buildTodayIcs(params: { dateKey: string; timeZone: string; lesso
   const partsSummary = lesson.lessonParts
     .map((p) => `Part ${p.part} (${p.duration} min): ${p.title} — ${p.exerciseName} @ ${p.targetBpm} BPM`)
     .join("\n");
-  const description = `Phase: ${lesson.phaseTitle}\nTotal duration: ${lesson.totalMinutes} minutes\n\n${partsSummary}`;
+  const description = `Level: ${lesson.phaseTitle}\nTotal duration: ${lesson.totalMinutes} minutes\n\n${partsSummary}`;
 
   const event = buildEvent({
     uidSeed: `today-${dateKey}-${randomSeed()}`,
     start,
     durationMinutes: lesson.totalMinutes,
-    summary: "Gospel Drum Coach — Daily Practice",
+    summary: "Kofi Emma — Today's Shed",
     description,
   });
 
@@ -114,7 +114,7 @@ export function buildRecurringPracticeIcs(params: {
         uidSeed: "recurring-morning",
         start: zonedTimeToUtc(startDateKey, morningTime, timeZone),
         durationMinutes: 55,
-        summary: "Gospel Drum Coach — Morning Practice",
+        summary: "Kofi Emma — Morning Shed",
         description: "Your 55-minute drum session is ready. Clean first. Fast later.",
         rrule: "RRULE:FREQ=DAILY",
       })
@@ -127,7 +127,7 @@ export function buildRecurringPracticeIcs(params: {
         uidSeed: "recurring-evening",
         start: zonedTimeToUtc(startDateKey, eveningTime, timeZone),
         durationMinutes: 55,
-        summary: "Gospel Drum Coach — Evening Practice",
+        summary: "Kofi Emma — Evening Shed",
         description: "Keep your consistency. Today's session is waiting.",
         rrule: "RRULE:FREQ=DAILY",
       })

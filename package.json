@@ -1,9 +1,9 @@
 {
-  "name": "gospel-drum-coach",
+  "name": "abele-drums-coach",
   "private": true,
-  "version": "2.0.0",
+  "version": "3.0.0",
   "type": "module",
-  "description": "Gospel Drum Coach — The Kofi Emma Method. A 100% client-side, local-first PWA drum practice coach — no backend, no database server. All curriculum progress, practice logs, and settings live in the browser's LocalStorage.",
+  "description": "Kofi Emma (Abele Drums Coach). A 100% client-side, local-first PWA — a premium Ghanaian gospel drum coaching system. No backend, no database server. All curriculum progress, practice logs, and settings live in the browser's LocalStorage.",
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "dev": "vite",

@@ -1,4 +1,4 @@
-import { getDb, mutate, type ReminderSettingsRecord, type UserSettingsRecord } from "../lib/localDb";
+import { getDb, mutate, type ReminderSettingsRecord, type UserSettingsRecord, type MetronomePreferencesRecord } from "../lib/localDb";
 
 export function getSettings(): UserSettingsRecord {
   return getDb().settings;
@@ -20,4 +20,15 @@ export function updateReminderSettings(partial: Partial<ReminderSettingsRecord>)
     db.reminderSettings = { ...db.reminderSettings, ...partial };
   });
   return getReminderSettings();
+}
+
+export function getMetronomePreferences(): MetronomePreferencesRecord {
+  return getDb().metronome;
+}
+
+export function updateMetronomePreferences(partial: Partial<MetronomePreferencesRecord>): MetronomePreferencesRecord {
+  mutate((db) => {
+    db.metronome = { ...db.metronome, ...partial };
+  });
+  return getMetronomePreferences();
 }

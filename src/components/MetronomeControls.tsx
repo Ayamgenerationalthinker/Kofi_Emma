@@ -13,6 +13,9 @@ export interface MetronomeControlsProps {
   tapDetectedBpm: number | null;
   onAcceptTap: () => void;
   large?: boolean;
+  /** Section 40: ACCENT ON/OFF — omit to hide the control entirely (e.g. during a curriculum exercise, where the accent always reflects the sticking pattern). */
+  accentOn?: boolean;
+  onToggleAccent?: () => void;
 }
 
 // Section 50/81: large touch targets and a large BPM readout — this screen
@@ -31,6 +34,8 @@ export function MetronomeControls({
   tapDetectedBpm,
   onAcceptTap,
   large = false,
+  accentOn,
+  onToggleAccent,
 }: MetronomeControlsProps) {
   return (
     <div className="flex flex-col items-center gap-6">
@@ -95,6 +100,20 @@ export function MetronomeControls({
           className="w-full accent-gold-500"
         />
       </div>
+
+      {onToggleAccent && (
+        <button
+          type="button"
+          onClick={onToggleAccent}
+          aria-pressed={accentOn}
+          className={[
+            "flex min-h-[44px] items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold",
+            accentOn ? "border-gold-500 bg-gold-500/10 text-gold-300" : "border-charcoal-600 text-parchment/60",
+          ].join(" ")}
+        >
+          Beat 1 Accent: {accentOn ? "ON" : "OFF"}
+        </button>
+      )}
 
       <div className="flex flex-col items-center gap-2">
         <button

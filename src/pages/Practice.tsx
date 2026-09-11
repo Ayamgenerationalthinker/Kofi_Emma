@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Flame } from "lucide-react";
+import { Flame, X } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
 import { useLocalDbVersion } from "../hooks/useLocalDb";
+import { useImmersive } from "../context/ImmersiveContext";
 import { generateTodayLesson, readTodayLesson, startTodaySession, completeSession } from "../services/practicePlannerService";
 import { getProgressSummary } from "../services/progressService";
 import { LessonPartRunner } from "../components/LessonPartRunner";
@@ -13,11 +14,14 @@ type Stage = "intro" | number | "summary"; // number = active part index (0-3)
 
 // The guided session flow. Everything — instructions, metronome, sticking
 // visualization, and the performance log — happens on this one page; the
-// user never has to navigate away to record a result.
+// user never has to navigate away to record a result. Section 110: while a
+// lesson part is active, the app switches to an immersive fullscreen-style
+// mode (no header/bottom nav) via ImmersiveContext.
 export function Practice() {
   const { user } = useAppContext();
   const timezone = user!.timezone;
   const wakeLock = useWakeLock();
+  const { setImmersive } = useImmersive();
 
   useEffect(() => {
     generateTodayLesson(timezone);
@@ -29,6 +33,14 @@ export function Practice() {
   const [stage, setStage] = useState<Stage>("intro");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [results, setResults] = useState<RecordAttemptResult[]>([]);
+
+  useEffect(() => {
+    setImmersive(typeof stage === "number");
+  }, [stage, setImmersive]);
+
+  useEffect(() => {
+    return () => setImmersive(false);
+  }, [setImmersive]);
 
   function beginSession() {
     const id = startTodaySession(timezone);
@@ -51,6 +63,11 @@ export function Practice() {
     if (sessionId) completeSession(sessionId);
     wakeLock.release();
     setStage("summary");
+  }
+
+  function exitPractice() {
+    wakeLock.release();
+    setStage("intro");
   }
 
   if (!lesson) return null;
@@ -95,7 +112,18 @@ export function Practice() {
   const activePart = lesson.lessonParts[stage];
   if (!activePart) return null;
 
-  return <LessonPartRunner key={activePart.exerciseId + stage} part={activePart} sessionId={sessionId} onComplete={handlePartComplete} />;
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={exitPractice}
+        className="mb-4 flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-parchment/60 hover:text-parchment"
+      >
+        <X className="h-4 w-4" /> Exit Practice
+      </button>
+      <LessonPartRunner key={activePart.exerciseId + stage} part={activePart} sessionId={sessionId} onComplete={handlePartComplete} />
+    </div>
+  );
 }
 
 function SummaryTile({ label, value }: { label: string; value: string | number }) {
@@ -135,7 +163,7 @@ function SessionSummary({
         <SummaryTile label="Streak" value={`${progress.streak.currentStreak}d`} />
       </div>
       <div className="flex flex-col items-center gap-3">
-        <Link to="/dashboard" className="rounded-full bg-gold-500 px-8 py-3 font-bold text-charcoal-950 hover:bg-gold-400">
+        <Link to="/" className="rounded-full bg-gold-500 px-8 py-3 font-bold text-charcoal-950 hover:bg-gold-400">
           Back to Dashboard
         </Link>
         <Link to="/progress" className="text-sm text-parchment/60 hover:text-parchment">

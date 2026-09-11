@@ -15,8 +15,24 @@ html {
   color-scheme: dark;
 }
 
+html,
+body {
+  /* Section 8: zero horizontal scroll anywhere in the app. Any component
+     that needs its own horizontal scroll (e.g. a wide sticking pattern)
+     must opt in locally with its own overflow-x-auto container. */
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   @apply bg-charcoal-950 text-parchment antialiased;
+}
+
+/* Section 92: safe-area support for notches/home-indicators, used by the
+   fixed bottom nav and full-bleed sheets. */
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 :focus-visible {

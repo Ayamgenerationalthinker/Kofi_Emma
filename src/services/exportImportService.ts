@@ -15,7 +15,7 @@ export function exportData(): LocalDbShape {
 
 export function downloadExport(): void {
   const data = exportData();
-  downloadTextFile("gospel-drum-coach-export.json", JSON.stringify(data, null, 2), "application/json");
+  downloadTextFile("abele-drums-coach-progress.json", JSON.stringify(data, null, 2), "application/json");
 }
 
 const ImportSchema = z.object({

@@ -1,17 +1,57 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Lock, ChevronDown, ChevronRight } from "lucide-react";
+import { Lock, ChevronDown, ChevronRight, BookOpen, ListTree } from "lucide-react";
 import { useLocalDbVersion } from "../hooks/useLocalDb";
 import { getDb } from "../lib/localDb";
 import { PHASES, exercisesForPhase } from "../data/curriculum";
 import { canUnlockPhase } from "../services/curriculumService";
 import { ProgressBar } from "../components/ProgressBar";
 import { StatusBadge } from "../components/StatusBadge";
+import { HandbookView } from "../components/handbook/HandbookView";
 
-// Locked phases stay visible with a locked message; their exercise lists
-// are never rendered — a discipline that mattered when this had to be
-// enforced across a network boundary, and is kept here for consistency.
+type Tab = "curriculum" | "handbook";
+
+// The "Learn" hub: the curriculum level list and the theory Handbook share
+// one nav slot (section 109) via a segmented control. Locked levels stay
+// visible with a locked message; their exercise lists are never rendered.
 export function Curriculum() {
+  const [tab, setTab] = useState<Tab>("curriculum");
+
+  return (
+    <div className="space-y-4">
+      <h1 className="text-2xl font-black">Learn</h1>
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setTab("curriculum")}
+          aria-pressed={tab === "curriculum"}
+          className={[
+            "flex min-h-[40px] items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-semibold",
+            tab === "curriculum" ? "border-gold-500 bg-gold-500/10 text-gold-300" : "border-charcoal-600 text-parchment/60",
+          ].join(" ")}
+        >
+          <ListTree className="h-4 w-4" /> Curriculum
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab("handbook")}
+          aria-pressed={tab === "handbook"}
+          className={[
+            "flex min-h-[40px] items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-semibold",
+            tab === "handbook" ? "border-gold-500 bg-gold-500/10 text-gold-300" : "border-charcoal-600 text-parchment/60",
+          ].join(" ")}
+        >
+          <BookOpen className="h-4 w-4" /> Handbook
+        </button>
+      </div>
+
+      {tab === "curriculum" ? <CurriculumLevelList /> : <HandbookView />}
+    </div>
+  );
+}
+
+function CurriculumLevelList() {
   useLocalDbVersion();
   const db = getDb();
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -24,15 +64,14 @@ export function Curriculum() {
       ...phase,
       unlocked,
       progress: exercises.length === 0 ? 0 : Math.round((mastered / exercises.length) * 100),
-      lockedMessage: unlocked ? null : `Master all Phase ${phase.number - 1} prerequisites to unlock ${phase.title}.`,
+      lockedMessage: unlocked ? null : `Master all Level ${phase.number - 1} prerequisites to unlock ${phase.title}.`,
       exercises: unlocked ? exercises : [],
     };
   });
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-black">Curriculum</h1>
-      <p className="text-parchment/60">Master the foundation before earning the next level.</p>
+    <div>
+      <p className="mb-3 text-parchment/60">Master the foundation before earning the next level.</p>
 
       <div className="space-y-3">
         {phases.map((phase) => {
@@ -58,7 +97,7 @@ export function Curriculum() {
                   )}
                   <div>
                     <p className="font-bold">
-                      Phase {phase.number}: {phase.title}
+                      Level {phase.number}: {phase.title}
                     </p>
                     <p className="text-sm text-parchment/60">{phase.subtitle}</p>
                   </div>

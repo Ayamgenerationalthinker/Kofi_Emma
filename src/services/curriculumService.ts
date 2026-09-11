@@ -51,7 +51,7 @@ export function assertCanAccessExercise(exerciseId: string): void {
 export function canUnlockPhase(phaseId: string): boolean {
   const phase = PHASES.find((p) => p.id === phaseId);
   if (!phase) throw Errors.notFound("Phase");
-  if (phase.number === 1) return true;
+  if (phase.number === 0) return true;
 
   const previousPhase = PHASES.find((p) => p.number === phase.number - 1);
   if (!previousPhase) return true;
@@ -84,7 +84,7 @@ export function recomputeUnlocks(): void {
 // Internal variant used while already inside a mutate() callback, operating on the draft directly.
 function canUnlockPhaseInternal(db: ReturnType<typeof getDb>, phaseId: string): boolean {
   const phase = PHASES.find((p) => p.id === phaseId);
-  if (!phase || phase.number === 1) return true;
+  if (!phase || phase.number === 0) return true;
   const previousPhase = PHASES.find((p) => p.number === phase.number - 1);
   if (!previousPhase) return true;
   const prevExercises = exercisesForPhase(previousPhase.id);
@@ -138,7 +138,7 @@ export interface CurriculumStateDto {
 export function getCurriculumState(): CurriculumStateDto {
   const db = getDb();
 
-  let currentPhaseNumber = 1;
+  let currentPhaseNumber = 0;
   let totalMastered = 0;
   let totalExercises = 0;
 

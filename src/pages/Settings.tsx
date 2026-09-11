@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Download, Upload, Trash2, BellRing } from "lucide-react";
+import { Download, Upload, Trash2, BellRing, ExternalLink } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
 import { useLocalDbVersion } from "../hooks/useLocalDb";
 import { updateUser } from "../services/profileService";
@@ -8,6 +8,8 @@ import { downloadExport, importData } from "../services/exportImportService";
 import { resetProgress } from "../services/dataService";
 import { isNotificationSupported, requestNotificationPermission } from "../lib/notifications";
 import { AppError } from "../lib/errors";
+import { ConfirmSheet } from "../components/ui/ConfirmSheet";
+import { KOFI_EMMA_CHANNEL_URL } from "../data/kofiEmmaVideos";
 import type { User } from "../lib/types";
 
 // Profile, practice defaults, notifications, theme, and data
@@ -25,7 +27,7 @@ export function Settings() {
     isNotificationSupported() ? Notification.permission : "unsupported"
   );
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const [resetConfirming, setResetConfirming] = useState(false);
+  const [resetSheetOpen, setResetSheetOpen] = useState(false);
   const [importMessage, setImportMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -59,14 +61,6 @@ export function Settings() {
     }
   }
 
-  function handleReset() {
-    if (!resetConfirming) {
-      setResetConfirming(true);
-      return;
-    }
-    resetProgress();
-    setResetConfirming(false);
-  }
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -213,17 +207,43 @@ export function Settings() {
           <input ref={fileInputRef} type="file" accept="application/json" className="hidden" onChange={handleImport} />
           <button
             type="button"
-            onClick={handleReset}
-            className={[
-              "flex items-center gap-2 rounded-md border px-4 py-2 text-sm",
-              resetConfirming ? "border-red-500 bg-red-950/40 text-red-300" : "border-charcoal-600 text-parchment/70 hover:border-red-500",
-            ].join(" ")}
+            onClick={() => setResetSheetOpen(true)}
+            className="flex min-h-[44px] items-center gap-2 rounded-md border border-charcoal-600 px-4 py-2 text-sm text-parchment/70 hover:border-red-500"
           >
-            <Trash2 className="h-4 w-4" /> {resetConfirming ? "Click again to confirm reset" : "Reset progress"}
+            <Trash2 className="h-4 w-4" /> Reset progress
           </button>
         </div>
         {importMessage && <p className="mt-2 text-sm text-parchment/60">{importMessage}</p>}
       </SettingsSection>
+
+      <SettingsSection title="About">
+        <p className="text-sm font-bold">Kofi Emma (Abele Drums Coach)</p>
+        <p className="text-sm text-parchment/60">
+          An independent drum-learning application inspired by Ghanaian gospel drumming study and public
+          performances. Built as a personal Ghanaian gospel drum practice system.
+        </p>
+        <p className="text-xs text-parchment/50">
+          Videos are embedded from YouTube and remain the property of their respective creators. This app is not
+          officially affiliated with Kofi Emma unless such affiliation is separately established.
+        </p>
+        <a
+          href={KOFI_EMMA_CHANNEL_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-gold-400 hover:underline"
+        >
+          View Kofi Emma Channel <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      </SettingsSection>
+
+      <ConfirmSheet
+        open={resetSheetOpen}
+        onClose={() => setResetSheetOpen(false)}
+        onConfirm={resetProgress}
+        title="Reset All Progress"
+        description="This will permanently erase your local practice history, BPM records, level progress, and preferences on this device."
+        confirmLabel="Reset Progress"
+      />
 
       <style>{`.input { width: 100%; border-radius: 0.375rem; border: 1px solid #38383E; background: #0B0B0C; padding: 0.5rem 0.75rem; }`}</style>
     </div>

@@ -1,4 +1,4 @@
-# Gospel Drum Coach — The Kofi Emma Method
+# Kofi Emma (Abele Drums Coach)
 
 A 100% client-side, local-first PWA practice coach for Ghanaian gospel drumming. **There is no
 backend and no database server** — the entire app is a static bundle, and every piece of practice

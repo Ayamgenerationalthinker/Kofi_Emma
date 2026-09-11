@@ -343,7 +343,7 @@ const phase1: ExerciseDef[] = [
     phaseNumber: 1,
     name: "Pocket Stability Challenge",
     slug: "pocket-stability-challenge",
-    description: "A groove-and-hold endurance drill combining the Phase 1 hand pattern and kick over an extended duration to test whether the pocket stays locked without drifting.",
+    description: "A groove-and-hold endurance drill combining the Level 0 hand pattern and kick over an extended duration to test whether the pocket stays locked without drifting.",
     purpose: "Prove that timing holds up over time, not only across a few bars — the real test of a usable groove.",
     category: "HIGH_LIFE",
     timeSignature: "4/4",
@@ -374,15 +374,15 @@ const phase1: ExerciseDef[] = [
   {
     id: "P1-E10",
     phaseNumber: 1,
-    name: "Phase 1 Mastery Assessment",
+    name: "Level 0 Mastery Assessment",
     slug: "phase-1-mastery-assessment",
-    description: "A combined checkpoint exercise: single strokes, double strokes, and the highlife hand pattern played back to back, gating entry into Phase 2.",
-    purpose: "Confirm every Phase 1 fundamental is solid enough to build Phase 2's linear vocabulary on top of it.",
+    description: "A combined checkpoint exercise: single strokes, double strokes, and the highlife hand pattern played back to back, gating entry into Level 1.",
+    purpose: "Confirm every Level 0 fundamental is solid enough to build Level 1's linear vocabulary on top of it.",
     category: "TECHNIQUE",
     timeSignature: "4/4",
     subdivision: "16th",
     stickingPattern: "R L R L R R L L",
-    techniqueNotes: "Play each section for at least 8 bars without a technique breakdown before moving to the next. This is the gate into Phase 2 — do not rush it.",
+    techniqueNotes: "Play each section for at least 8 bars without a technique breakdown before moving to the next. This is the gate into Level 1 — do not rush it.",
     commonMistakes: ["Rushing through sections to finish the assessment", "Neglecting grip relaxation under evaluation pressure", "Skipping the double-stroke section"],
     targetBpm: 104,
     minimumBpm: 70,
@@ -459,7 +459,7 @@ const phase2: ExerciseDef[] = [
     phaseNumber: 2,
     name: "Paradiddle-Diddle Control",
     slug: "paradiddle-diddle-control",
-    description: "The paradiddle-diddle (R L R R L L), a six-note rudiment that extends the Phase 1 paradiddle with a second diddle, used widely in gospel fill construction.",
+    description: "The paradiddle-diddle (R L R R L L), a six-note rudiment that extends the Level 0 paradiddle with a second diddle, used widely in gospel fill construction.",
     purpose: "Add a longer compound rudiment to the vocabulary feeding linear fill construction.",
     category: "TECHNIQUE",
     timeSignature: "4/4",
@@ -638,15 +638,15 @@ const phase2: ExerciseDef[] = [
   {
     id: "P2-E10",
     phaseNumber: 2,
-    name: "Phase 2 Mastery Assessment",
+    name: "Level 1 Mastery Assessment",
     slug: "phase-2-mastery-assessment",
     description: "A combined checkpoint: six-stroke linear orchestration, the praise pocket groove, and the transition drill played back to back at praise tempo.",
-    purpose: "Confirm the linear vocabulary and praise-tempo pocket are solid enough to support Phase 3's independence work.",
+    purpose: "Confirm the linear vocabulary and praise-tempo pocket are solid enough to support Level 2's independence work.",
     category: "TECHNIQUE",
     timeSignature: "4/4",
     subdivision: "16th",
     stickingPattern: "R L K K R L",
-    techniqueNotes: "Every section must be clean on its own before combining them. This assessment gates entry into Phase 3.",
+    techniqueNotes: "Every section must be clean on its own before combining them. This assessment gates entry into Level 2.",
     commonMistakes: ["Rushing the assessment instead of validating each section", "Neglecting the transition drill section", "Chasing tempo over accuracy under evaluation pressure"],
     targetBpm: 135,
     minimumBpm: 100,
@@ -748,7 +748,7 @@ const phase3: ExerciseDef[] = [
     phaseNumber: 3,
     name: "Independence Matrix: Hands + Kick Ostinato",
     slug: "independence-matrix-hands-kick-ostinato",
-    description: "The Phase 1 single-stroke hand pattern layered over the syncopated kick ostinato from P3-E03 — the first true multi-limb independence matrix.",
+    description: "The Level 0 single-stroke hand pattern layered over the syncopated kick ostinato from P3-E03 — the first true multi-limb independence matrix.",
     purpose: "Combine a steady hand layer with an independent syncopated foot layer without either destabilizing the other.",
     category: "INDEPENDENCE",
     timeSignature: "4/4",
@@ -910,15 +910,15 @@ const phase3: ExerciseDef[] = [
   {
     id: "P3-E10",
     phaseNumber: 3,
-    name: "Phase 3 Mastery Assessment",
+    name: "Level 2 Mastery Assessment",
     slug: "phase-3-mastery-assessment",
-    description: "A combined checkpoint spanning flam dynamics, the full independence matrix, and 6/8 or 12/8 application, gating entry into Phase 4's professional material.",
+    description: "A combined checkpoint spanning flam dynamics, the full independence matrix, and 6/8 or 12/8 application, gating entry into Level 3's professional material.",
     purpose: "Confirm advanced independence and compound-meter vocabulary are solid before soloing and professional-tempo material begins.",
     category: "INDEPENDENCE",
     timeSignature: "4/4",
     subdivision: "16th",
     stickingPattern: "R L R L",
-    techniqueNotes: "Every section — flams, the full independence matrix, and at least one compound-meter groove — must be demonstrated cleanly. This assessment gates entry into Phase 4.",
+    techniqueNotes: "Every section — flams, the full independence matrix, and at least one compound-meter groove — must be demonstrated cleanly. This assessment gates entry into Level 3.",
     commonMistakes: ["Skipping the compound-meter section", "Rushing the independence matrix under evaluation pressure", "Neglecting flam dynamics after weeks of focusing on independence"],
     targetBpm: 100,
     minimumBpm: 65,
@@ -941,7 +941,7 @@ const phase4: ExerciseDef[] = [
     phaseNumber: 4,
     name: "Drag Variations",
     slug: "drag-variations",
-    description: "Drag (two grace notes plus a main note) variations alternating hands, extending the flam vocabulary from Phase 3 into denser ornamentation.",
+    description: "Drag (two grace notes plus a main note) variations alternating hands, extending the flam vocabulary from Level 2 into denser ornamentation.",
     purpose: "Add drag ornamentation to the vocabulary feeding ratamacues and professional fill construction.",
     category: "SOLOING",
     timeSignature: "4/4",
@@ -1146,7 +1146,7 @@ const phase4: ExerciseDef[] = [
   {
     id: "P4-E10",
     phaseNumber: 4,
-    name: "Phase 4 Master-Class Challenge",
+    name: "Level 3 Master-Class Challenge",
     slug: "phase-4-master-class-challenge",
     description: "The curriculum's final checkpoint: a full performance combining a fast praise groove, a constructed solo phrase, an advanced transition, and a dynamic resolution, sustained for professional-length endurance.",
     purpose: "Demonstrate every capability the curriculum has built, combined under real performance conditions.",
@@ -1170,11 +1170,18 @@ const phase4: ExerciseDef[] = [
 
 const PHASE_EXERCISE_GROUPS = [phase1, phase2, phase3, phase4];
 
+// Section 21-25: exactly four curriculum levels, numbered 0-3 to match the
+// product's own naming (Level 0 Absolute Beginner ... Level 3 Professional
+// Maestro). The underlying `id`s and exercise content below are carried
+// forward from this curriculum's earlier 4-phase structure — genuinely
+// solid, tested pedagogical content — reframed under the new Level
+// nomenclature rather than rewritten from a blank page; see the
+// implementation report for that scope note.
 export const PHASES: CurriculumPhase[] = [
   {
     id: "phase-1",
-    number: 1,
-    title: "The Foundation & Highlife Pocket",
+    number: 0,
+    title: "Absolute Beginner",
     subtitle: "Grip, rebound, timing, and the 4/4 highlife pocket.",
     description:
       "Single strokes, double strokes, paradiddles, Moeller technique and basic highlife hand patterns — the technical and stylistic foundation everything else is built on.",
@@ -1182,8 +1189,8 @@ export const PHASES: CurriculumPhase[] = [
   },
   {
     id: "phase-2",
-    number: 2,
-    title: "Linear Subdivisions & Praise Medleys",
+    number: 1,
+    title: "Intermediate",
     subtitle: "Six-stroke rolls, kick integration, and 130-150 BPM fast praise.",
     description:
       "Linear hand-and-foot combinations, paradiddle-diddles, and orchestration applied to fast gospel praise medleys.",
@@ -1191,8 +1198,8 @@ export const PHASES: CurriculumPhase[] = [
   },
   {
     id: "phase-3",
-    number: 3,
-    title: "Kofi Emma Advanced Chops & Independence",
+    number: 2,
+    title: "Advanced",
     subtitle: "Flams, independence matrices, hi-hat barking, 6/8 and 12/8.",
     description:
       "Multi-limb independence, syncopated foot ostinatos, and compound-meter (6/8 and 12/8) West African vocabulary.",
@@ -1200,8 +1207,8 @@ export const PHASES: CurriculumPhase[] = [
   },
   {
     id: "phase-4",
-    number: 4,
-    title: "Professional Mastery & Soloing",
+    number: 3,
+    title: "Professional Maestro",
     subtitle: "Drags, ratamacues, 32nd-note vocabulary, and solo construction.",
     description:
       "Advanced ornamentation, phrase displacement, and constructing complete musical solos with intentional dynamic phrasing.",

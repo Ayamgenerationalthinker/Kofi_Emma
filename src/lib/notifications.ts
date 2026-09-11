@@ -4,11 +4,11 @@
 
 export const NOTIFICATION_COPY = {
   morning: {
-    title: "Gospel Drum Coach — Morning Practice",
+    title: "Kofi Emma — Morning Shed",
     body: "Your 55-minute drum session is ready.",
   },
   evening: {
-    title: "Gospel Drum Coach — Evening Practice",
+    title: "Kofi Emma — Evening Shed",
     body: "Keep your consistency. Today's session is waiting.",
   },
 };

@@ -10,13 +10,14 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "robots.txt"],
       manifest: {
-        name: "Gospel Drum Coach — The Kofi Emma Method",
-        short_name: "Drum Coach",
+        name: "Kofi Emma (Abele Drums Coach)",
+        short_name: "Abele Drums Coach",
         description:
-          "A disciplined, local-first gospel drum practice coach. 100% client-side — your practice data never leaves this device.",
+          "Premium Ghanaian gospel drum practice coach. 100% client-side — your practice data never leaves this device.",
         theme_color: "#0B0B0C",
         background_color: "#0B0B0C",
         display: "standalone",
+        orientation: "portrait",
         start_url: "/",
         icons: [
           { src: "icons/icon.svg", sizes: "any", type: "image/svg+xml" },

@@ -6,9 +6,9 @@ import { storageAvailable } from "../lib/localDb";
 
 type PracticeTimePreference = "morning" | "evening" | "both";
 
-// First-run experience. Collects just enough to start Phase 1 — experience
-// level informs coaching tone later, not which phase they start on (you can
-// never pick Phase 2 manually).
+// First-run experience. Collects just enough to start Level 0 — experience
+// level informs coaching tone later, not which curriculum level they start
+// on (you can never pick Level 1+ manually — see section 54).
 export function Onboarding() {
   const navigate = useNavigate();
 
@@ -35,7 +35,7 @@ export function Onboarding() {
         morningTime: "07:00",
         eveningTime: "19:00",
       });
-      navigate("/dashboard", { replace: true });
+      navigate("/", { replace: true });
     } catch (err) {
       setError(err instanceof AppError ? err.message : "Something went wrong creating your profile.");
     }
@@ -44,11 +44,11 @@ export function Onboarding() {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-4 text-parchment">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-black tracking-tight">Gospel Drum Coach</h1>
-        <p className="mt-1 text-gold-400">The Kofi Emma Method</p>
+        <h1 className="text-3xl font-black tracking-tight">Kofi Emma</h1>
+        <p className="mt-1 text-gold-400">Abele Drums Coach</p>
         <p className="mt-4 text-sm text-parchment/60">
-          This app runs entirely on this device — your practice data is stored locally in your browser and never
-          leaves it. Master the foundation before earning the next level.
+          A premium Ghanaian gospel drum coaching system — rhythm, timing, independence, and chops. This app runs
+          entirely on this device; your practice data is stored locally in your browser and never leaves it.
         </p>
         {!storageAvailable && (
           <p className="mt-3 rounded-md border border-amber-600/50 bg-amber-950/30 px-3 py-2 text-xs text-amber-300">
@@ -126,7 +126,7 @@ export function Onboarding() {
         )}
 
         <button type="submit" className="w-full rounded-md bg-gold-500 py-3 font-bold text-charcoal-950 hover:bg-gold-400">
-          Start Phase 1
+          Start Level 0
         </button>
       </form>
     </div>

@@ -35,7 +35,7 @@ describe("calendarService", () => {
     expect(ics).toContain("END:VALARM");
     expect(ics.trim().endsWith("END:VCALENDAR")).toBe(true);
     expect(ics).toMatch(/DTSTART:\d{8}T\d{6}Z/);
-    expect(ics).toContain("SUMMARY:Gospel Drum Coach — Daily Practice");
+    expect(ics).toContain("SUMMARY:Kofi Emma — Today's Shed");
   });
 
   it("builds recurring daily morning and evening reminder events with RRULE", () => {
@@ -50,8 +50,8 @@ describe("calendarService", () => {
 
     expect((ics.match(/BEGIN:VEVENT/g) ?? []).length).toBe(2);
     expect(ics).toContain("RRULE:FREQ=DAILY");
-    expect(ics).toContain("Morning Practice");
-    expect(ics).toContain("Evening Practice");
+    expect(ics).toContain("Morning Shed");
+    expect(ics).toContain("Evening Shed");
   });
 
   it("omits the evening event when the evening reminder is disabled", () => {
@@ -64,7 +64,7 @@ describe("calendarService", () => {
       startDateKey: "2026-01-15",
     });
     expect((ics.match(/BEGIN:VEVENT/g) ?? []).length).toBe(1);
-    expect(ics).not.toContain("Evening Practice");
+    expect(ics).not.toContain("Evening Shed");
   });
 
   it("respects Africa/Accra having no DST offset (07:00 local stays 07:00Z)", () => {

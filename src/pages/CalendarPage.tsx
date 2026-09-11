@@ -24,7 +24,7 @@ export function CalendarPage() {
   function downloadToday() {
     if (!lesson) return;
     const ics = buildTodayIcs({ dateKey: todayKey(timezone), timeZone: timezone, lesson });
-    downloadTextFile("gospel-drum-coach-today.ics", ics);
+    downloadTextFile("abele-drums-coach-today.ics", ics);
   }
 
   function downloadRecurring() {
@@ -36,7 +36,7 @@ export function CalendarPage() {
       eveningOn: reminders.eveningOn,
       startDateKey: todayKey(timezone),
     });
-    downloadTextFile("gospel-drum-coach-practice.ics", ics);
+    downloadTextFile("abele-drums-coach-practice.ics", ics);
   }
 
   return (

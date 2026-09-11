@@ -49,7 +49,7 @@ describe("curriculumService locking", () => {
   it("reports curriculum state progress percentages derived from mastered counts", () => {
     masterExercise("P1-E01");
     const state = getCurriculumState();
-    const phase1 = state.phases.find((p) => p.number === 1)!;
+    const phase1 = state.phases.find((p) => p.number === 0)!;
     expect(phase1.masteredExercises).toBe(1);
     expect(phase1.progress).toBe(10); // 1 of 10 phase-1 exercises mastered
 

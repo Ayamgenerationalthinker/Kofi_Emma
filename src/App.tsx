@@ -13,6 +13,7 @@ import { Metronome } from "./pages/Metronome";
 import { Progress } from "./pages/Progress";
 import { CalendarPage } from "./pages/CalendarPage";
 import { Settings } from "./pages/Settings";
+import { Shed } from "./pages/Shed";
 import { NotFound } from "./pages/NotFound";
 import { useNotificationScheduler } from "./hooks/useNotificationScheduler";
 import { ensureProgressInitialized } from "./services/curriculumService";
@@ -74,16 +75,18 @@ export default function App() {
       <AppEffectsHost />
       <Routes>
         <Route element={<Layout />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/curriculum" element={<Curriculum />} />
           <Route path="/curriculum/:exerciseId" element={<ExerciseDetail />} />
+          <Route path="/handbook" element={<Navigate to="/curriculum" replace />} />
+          <Route path="/shed" element={<Shed />} />
           <Route path="/metronome" element={<Metronome />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/onboarding" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/onboarding" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
