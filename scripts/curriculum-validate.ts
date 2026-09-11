@@ -1,9 +1,10 @@
-// npm run curriculum:validate — section 96. Statically validates the
-// curriculum content defined in prisma/seed.ts before it ever touches the
-// database: duplicate ids/slugs, missing prerequisites, circular
-// dependencies, invalid phase references, and out-of-range BPM/accuracy.
+// npm run curriculum:validate — statically validates the curriculum content
+// defined in src/data/curriculum.ts: duplicate ids/slugs, missing
+// prerequisites, circular dependencies, invalid phase references, and
+// out-of-range BPM/accuracy. Runs against plain data, no browser or
+// LocalStorage involved.
 
-import { PHASES, ALL_EXERCISES, computePrerequisitePairs } from "../prisma/seed.js";
+import { PHASES, EXERCISES } from "../src/data/curriculum.ts";
 
 interface ValidationError {
   rule: string;
@@ -17,7 +18,7 @@ function validate(): ValidationError[] {
   const exerciseIds = new Set<string>();
   const slugs = new Set<string>();
 
-  for (const exercise of ALL_EXERCISES) {
+  for (const exercise of EXERCISES) {
     if (exerciseIds.has(exercise.id)) {
       errors.push({ rule: "duplicate-id", message: `Duplicate exercise id: ${exercise.id}` });
     }
@@ -28,9 +29,8 @@ function validate(): ValidationError[] {
     }
     slugs.add(exercise.slug);
 
-    const phaseId = `phase-${exercise.phaseNumber}`;
-    if (!phaseIds.has(phaseId)) {
-      errors.push({ rule: "invalid-phase-reference", message: `${exercise.id} references unknown phase ${phaseId}` });
+    if (!phaseIds.has(exercise.phaseId)) {
+      errors.push({ rule: "invalid-phase-reference", message: `${exercise.id} references unknown phase ${exercise.phaseId}` });
     }
 
     if (exercise.minimumBpm >= exercise.maximumBpm) {
@@ -48,23 +48,20 @@ function validate(): ValidationError[] {
   }
 
   for (const phase of PHASES) {
-    const count = ALL_EXERCISES.filter((e) => e.phaseNumber === phase.number).length;
+    const count = EXERCISES.filter((e) => e.phaseNumber === phase.number).length;
     if (count < 10) {
       errors.push({ rule: "insufficient-exercises", message: `Phase ${phase.number} has only ${count} exercises (minimum 10)` });
     }
   }
 
-  const pairs = computePrerequisitePairs();
   const adjacency = new Map<string, string[]>();
-  for (const { exerciseId, prerequisiteId } of pairs) {
-    if (!exerciseIds.has(exerciseId)) {
-      errors.push({ rule: "missing-prerequisite-target", message: `Prerequisite references unknown exercise ${exerciseId}` });
+  for (const exercise of EXERCISES) {
+    for (const prereqId of exercise.prerequisiteIds) {
+      if (!exerciseIds.has(prereqId)) {
+        errors.push({ rule: "missing-prerequisite", message: `${exercise.id} has unknown prerequisite ${prereqId}` });
+      }
     }
-    if (!exerciseIds.has(prerequisiteId)) {
-      errors.push({ rule: "missing-prerequisite", message: `${exerciseId} has unknown prerequisite ${prerequisiteId}` });
-    }
-    if (!adjacency.has(exerciseId)) adjacency.set(exerciseId, []);
-    adjacency.get(exerciseId)!.push(prerequisiteId);
+    adjacency.set(exercise.id, exercise.prerequisiteIds);
   }
 
   // Circular-dependency check via DFS over the "requires" graph.
@@ -96,14 +93,14 @@ function validate(): ValidationError[] {
 }
 
 const errors = validate();
+const totalPrereqEdges = EXERCISES.reduce((sum, e) => sum + e.prerequisiteIds.length, 0);
+
 if (errors.length > 0) {
   console.error(`Curriculum validation FAILED with ${errors.length} error(s):\n`);
   for (const e of errors) console.error(`  [${e.rule}] ${e.message}`);
   process.exit(1);
 } else {
   console.log(
-    `Curriculum validation PASSED: ${PHASES.length} phases, ${ALL_EXERCISES.length} exercises, ${
-      computePrerequisitePairs().length
-    } prerequisite edges, no cycles.`
+    `Curriculum validation PASSED: ${PHASES.length} phases, ${EXERCISES.length} exercises, ${totalPrereqEdges} prerequisite edges, no cycles.`
   );
 }
