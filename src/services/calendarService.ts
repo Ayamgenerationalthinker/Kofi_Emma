@@ -65,7 +65,7 @@ function wrapCalendar(events: string[]): string {
     [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//Kofi Emma//Abele Drums Coach//EN",
+      "PRODID:-//Abele Drums Coach//EN",
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       ...events,
@@ -90,7 +90,7 @@ export function buildTodayIcs(params: { dateKey: string; timeZone: string; lesso
     uidSeed: `today-${dateKey}-${randomSeed()}`,
     start,
     durationMinutes: lesson.totalMinutes,
-    summary: "Kofi Emma — Today's Shed",
+    summary: "Abele Drums Coach — Today's Shed",
     description,
   });
 
@@ -114,7 +114,7 @@ export function buildRecurringPracticeIcs(params: {
         uidSeed: "recurring-morning",
         start: zonedTimeToUtc(startDateKey, morningTime, timeZone),
         durationMinutes: 55,
-        summary: "Kofi Emma — Morning Shed",
+        summary: "Abele Drums Coach — Morning Shed",
         description: "Your 55-minute drum session is ready. Clean first. Fast later.",
         rrule: "RRULE:FREQ=DAILY",
       })
@@ -127,7 +127,7 @@ export function buildRecurringPracticeIcs(params: {
         uidSeed: "recurring-evening",
         start: zonedTimeToUtc(startDateKey, eveningTime, timeZone),
         durationMinutes: 55,
-        summary: "Kofi Emma — Evening Shed",
+        summary: "Abele Drums Coach — Evening Shed",
         description: "Keep your consistency. Today's session is waiting.",
         rrule: "RRULE:FREQ=DAILY",
       })

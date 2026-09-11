@@ -15,13 +15,25 @@ import type {
   DailyLessonRecord,
   BpmRecordEntry,
   VideoStudyRecord,
+  OnboardingProfileRecord,
 } from "./types";
 import { LEGACY_STORAGE_KEYS } from "./keys";
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export function defaultSettings(): UserSettingsRecord {
-  return { preferredDurationMinutes: 55, defaultBpmIncrease: 5, accuracyThreshold: 90, metronomeVolume: 80, theme: "system" };
+  return {
+    preferredDurationMinutes: 55,
+    defaultBpmIncrease: 5,
+    accuracyThreshold: 90,
+    metronomeVolume: 80,
+    theme: "system",
+    accountPromptDismissedAt: null,
+  };
+}
+
+export function defaultOnboardingProfile(): OnboardingProfileRecord {
+  return { goals: [], experienceDescription: null };
 }
 
 export function defaultReminderSettings(): ReminderSettingsRecord {
@@ -45,6 +57,7 @@ export function defaultDb(): LocalDbShape {
     reminderSettings: defaultReminderSettings(),
     metronome: defaultMetronomePreferences(),
     videoStudy: {},
+    onboardingProfile: defaultOnboardingProfile(),
   };
 }
 
@@ -85,6 +98,8 @@ export function migrate(raw: unknown): LocalDbShape {
     // fall through to defaults with no explicit transform needed.
     metronome: { ...defaults.metronome, ...asObject(data.metronome) },
     videoStudy: asRecord<VideoStudyRecord>(data.videoStudy, defaults.videoStudy),
+    // Added in schema v3 — same story.
+    onboardingProfile: { ...defaults.onboardingProfile, ...asObject(data.onboardingProfile) } as OnboardingProfileRecord,
   };
 }
 

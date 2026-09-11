@@ -87,6 +87,7 @@ const ImportSchema = z.object({
       accuracyThreshold: z.number().int(),
       metronomeVolume: z.number().int(),
       theme: z.enum(["light", "dark", "system"]),
+      accountPromptDismissedAt: z.string().nullable().optional().default(null),
     })
     .optional(),
   reminderSettings: z

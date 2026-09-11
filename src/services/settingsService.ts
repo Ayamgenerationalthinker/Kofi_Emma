@@ -1,4 +1,12 @@
-import { getDb, mutate, type ReminderSettingsRecord, type UserSettingsRecord, type MetronomePreferencesRecord } from "../lib/localDb";
+import {
+  getDb,
+  mutate,
+  type ReminderSettingsRecord,
+  type UserSettingsRecord,
+  type MetronomePreferencesRecord,
+  type OnboardingProfileRecord,
+  type PracticeGoal,
+} from "../lib/localDb";
 
 export function getSettings(): UserSettingsRecord {
   return getDb().settings;
@@ -31,4 +39,23 @@ export function updateMetronomePreferences(partial: Partial<MetronomePreferences
     db.metronome = { ...db.metronome, ...partial };
   });
   return getMetronomePreferences();
+}
+
+export function getOnboardingProfile(): OnboardingProfileRecord {
+  return getDb().onboardingProfile;
+}
+
+export function saveOnboardingProfile(goals: PracticeGoal[], experienceDescription: OnboardingProfileRecord["experienceDescription"]): void {
+  mutate((db) => {
+    db.onboardingProfile = { goals, experienceDescription };
+  });
+}
+
+/** Section 5 (UX spec): the "keep your progress safe" account prompt is shown once, gently, after meaningful progress — never forced at onboarding, never nagged. */
+export function shouldShowAccountPrompt(): boolean {
+  return getDb().settings.accountPromptDismissedAt == null;
+}
+
+export function dismissAccountPrompt(): void {
+  updateSettings({ accountPromptDismissedAt: new Date().toISOString() });
 }

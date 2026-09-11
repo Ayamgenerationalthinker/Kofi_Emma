@@ -1,8 +1,72 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#121214"/>
-  <circle cx="256" cy="256" r="176" fill="none" stroke="#D8A94E" stroke-width="14"/>
-  <circle cx="256" cy="256" r="120" fill="none" stroke="#D8A94E" stroke-width="8" opacity="0.55"/>
-  <line x1="150" y1="150" x2="220" y2="220" stroke="#F4E7C9" stroke-width="22" stroke-linecap="round"/>
-  <line x1="362" y1="150" x2="292" y2="220" stroke="#F4E7C9" stroke-width="22" stroke-linecap="round"/>
-  <circle cx="256" cy="256" r="20" fill="#D8A94E"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <radialGradient id="drumHeadGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1B1F23"/>
+      <stop offset="85%" stop-color="#14171A"/>
+      <stop offset="100%" stop-color="#0B0D0F"/>
+    </radialGradient>
+
+    <linearGradient id="goldStick" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F2C45C"/>
+      <stop offset="50%" stop-color="#D9A441"/>
+      <stop offset="100%" stop-color="#B88328"/>
+    </linearGradient>
+
+    <filter id="drumGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="14" flood-color="#D9A441" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- PWA App Tile Background -->
+  <rect width="512" height="512" rx="112" fill="#0B0D0F" stroke="#262B30" stroke-width="4"/>
+
+  <!-- ==================== DRUM STRUCTURE ==================== -->
+  <!-- Outer Die-Cast Rim -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#262B30" stroke-width="14"/>
+  <circle cx="256" cy="256" r="176" fill="url(#drumHeadGrad)" stroke="#383F47" stroke-width="4"/>
+
+  <!-- 8 Snare Drum Tension Lugs around Rim -->
+  <g fill="#D9A441">
+    <!-- Top & Bottom -->
+    <rect x="250" y="58" width="12" height="18" rx="3"/>
+    <rect x="250" y="436" width="12" height="18" rx="3"/>
+    <!-- Left & Right -->
+    <rect x="58" y="250" width="18" height="12" rx="3"/>
+    <rect x="436" y="250" width="18" height="12" rx="3"/>
+    <!-- Diagonals -->
+    <rect x="116" y="116" width="16" height="12" rx="3" transform="rotate(45 124 122)"/>
+    <rect x="380" y="116" width="16" height="12" rx="3" transform="rotate(-45 388 122)"/>
+    <rect x="116" y="380" width="16" height="12" rx="3" transform="rotate(-45 124 386)"/>
+    <rect x="380" y="380" width="16" height="12" rx="3" transform="rotate(45 388 386)"/>
+  </g>
+
+  <!-- Coated Head Inner Ring / Rim Shot Zone -->
+  <circle cx="256" cy="256" r="132" fill="none" stroke="#262B30" stroke-width="2" stroke-dasharray="6 6"/>
+
+  <!-- ==================== CROSSED DRUMSTICKS ==================== -->
+  <g filter="url(#drumGlow)">
+    <!-- LEFT-TO-RIGHT STICK -->
+    <g transform="rotate(-35 256 256)">
+      <!-- Butt & Shaft -->
+      <path d="M249 420 L249 140 L263 140 L263 420 Z" fill="url(#goldStick)"/>
+      <!-- Tapered Neck -->
+      <path d="M249 140 L252 104 L260 104 L263 140 Z" fill="#F2C45C"/>
+      <!-- Acorn Bead Tip -->
+      <ellipse cx="256" cy="94" rx="7" ry="11" fill="#F5F1E8"/>
+    </g>
+
+    <!-- RIGHT-TO-LEFT STICK -->
+    <g transform="rotate(35 256 256)">
+      <!-- Butt & Shaft -->
+      <path d="M249 420 L249 140 L263 140 L263 420 Z" fill="url(#goldStick)"/>
+      <!-- Tapered Neck -->
+      <path d="M249 140 L252 104 L260 104 L263 140 Z" fill="#F2C45C"/>
+      <!-- Acorn Bead Tip -->
+      <ellipse cx="256" cy="94" rx="7" ry="11" fill="#F5F1E8"/>
+    </g>
+  </g>
+
+  <!-- CENTER IMPACT SWEET SPOT (The "Abele Downbeat") -->
+  <circle cx="256" cy="256" r="26" fill="#0B0D0F" stroke="#D9A441" stroke-width="5"/>
+  <circle cx="256" cy="256" r="12" fill="#F5F1E8"/>
 </svg>

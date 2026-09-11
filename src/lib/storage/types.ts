@@ -88,6 +88,16 @@ export interface UserSettingsRecord {
   accuracyThreshold: number;
   metronomeVolume: number;
   theme: "light" | "dark" | "system";
+  /** ISO timestamp of the last time the "keep your progress safe" account prompt was dismissed, or null if never shown/dismissed. */
+  accountPromptDismissedAt: string | null;
+}
+
+/** Styles/goals picked during onboarding (section 4, Screen 3) — informs "Today's Focus" framing, never re-asked. */
+export type PracticeGoal = "Gospel" | "Praise" | "Worship" | "Highlife" | "Reggae" | "Grooves" | "Chops" | "Timing" | "Speed" | "Overall musicianship";
+
+export interface OnboardingProfileRecord {
+  goals: PracticeGoal[];
+  experienceDescription: "never" | "basics" | "sometimes" | "experienced" | null;
 }
 
 /** The standalone metronome's last-used settings, restored on next visit (section 4). */
@@ -129,4 +139,5 @@ export interface LocalDbShape {
   reminderSettings: ReminderSettingsRecord;
   metronome: MetronomePreferencesRecord;
   videoStudy: Record<string, VideoStudyRecord>;
+  onboardingProfile: OnboardingProfileRecord;
 }

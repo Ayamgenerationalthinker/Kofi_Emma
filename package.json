@@ -3,7 +3,7 @@
   "private": true,
   "version": "3.0.0",
   "type": "module",
-  "description": "Kofi Emma (Abele Drums Coach). A 100% client-side, local-first PWA — a premium Ghanaian gospel drum coaching system. No backend, no database server. All curriculum progress, practice logs, and settings live in the browser's LocalStorage.",
+  "description": "Abele Drums Coach. A client-side-first, local-first PWA — a premium Ghanaian gospel drum coaching system. No custom backend server; persistence is LocalStorage by default, with optional Supabase cloud sync for accounts.",
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "dev": "vite",
@@ -16,6 +16,7 @@
     "curriculum:validate": "tsx scripts/curriculum-validate.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
     "lucide-react": "^0.454.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

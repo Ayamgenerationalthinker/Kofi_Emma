@@ -1,4 +1,4 @@
-# Kofi Emma (Abele Drums Coach)
+# Abele Drums Coach
 
 A 100% client-side, local-first PWA practice coach for Ghanaian gospel drumming. **There is no
 backend and no database server** — the entire app is a static bundle, and every piece of practice
@@ -150,6 +150,15 @@ The Calendar page generates and downloads, entirely client-side:
 
 Both are standard RFC 5545 files importable into Google Calendar, Apple Calendar, Outlook, etc.
 
+## Cloud Sync (optional)
+
+The app works fully offline as a guest with no account, no configuration, no server. If you want
+progress to follow you across devices, you can optionally wire up a free Supabase project (Auth +
+Postgres) — see [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md) for the exact steps and
+[docs/DATA_MODEL.md](docs/DATA_MODEL.md) for how LocalStorage and Supabase split responsibilities.
+**No Supabase project is configured for this app by default** — until you complete that setup and
+set `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`, every user is a guest and everything stays local.
+
 ## Troubleshooting
 
 | Problem | Fix |
@@ -160,26 +169,33 @@ Both are standard RFC 5545 files importable into Google Calendar, Apple Calendar
 | `curriculum:validate` fails | The failure message names the exact rule violated (duplicate id/slug, missing prerequisite, circular dependency, invalid BPM/accuracy range). Fix `src/data/curriculum.ts` and re-run. |
 | Metronome has no sound | Browsers require a user gesture before audio can play — press Start once; also check the volume slider and OS volume. |
 | Notifications never fire | Check the browser granted permission, and that the tab stays open — see the Notifications section above. |
-| Data doesn't show up on another device | Expected — there is no server, so nothing syncs across devices. Export on one device, import on the other. |
+| Data doesn't show up on another device | Without cloud sync set up (see above), that's expected — export on one device, import on the other. With an account signed in on both devices, open Settings → Account (or just reopen the app) to trigger a sync. |
 
 ## Project Structure
 
 ```
 src/
-  audio/        AudioEngine, MetronomeEngine, PatternScheduler (Web Audio scheduling)
-  components/   Reusable UI: StickingVisualizer, MetronomeControls, forms
-  context/      AppContext (local user profile, reactive over localStorage)
-  data/         curriculum.ts — the static 4-phase, 40-exercise content
+  audio/        AudioEngine, MetronomeEngine, PatternScheduler, meter.ts (Web Audio scheduling)
+  components/   Reusable UI: StickingVisualizer, MetronomeControls, forms, ActionSheet, account/, shed/
+  context/      AppContext (local guest profile), AuthContext (optional Supabase session)
+  data/         curriculum.ts, kofiEmmaVideos.ts, handbook/ — static, build-time content
   hooks/        useMetronome, useLocalDb, useWakeLock, useNotificationScheduler
-  lib/          localDb (the persistence layer), dates, errors, notifications, shared types
-  pages/        Dashboard, Practice, Curriculum, ExerciseDetail, Metronome, Progress, Calendar, Settings
+  lib/          localDb (LocalStorage layer), supabase/ (optional client), dates, errors, shared types
+  pages/        Dashboard, Practice, Curriculum, ExerciseDetail, Metronome, Progress, Calendar,
+                Shed, Settings
   services/     curriculumService, masteryService, bpmProgressionService,
                 performanceAnalysisService, practicePlannerService, progressService,
-                calendarService, profileService, settingsService, exportImportService, dataService
+                calendarService, profileService, settingsService, exportImportService, dataService,
+                authService, syncService, syncMergeRules, videoStudyService
+
+supabase/
+  schema.sql    Postgres schema + Row Level Security policies (see docs/SUPABASE_SETUP.md)
 ```
 
 ## Data Privacy
 
-Your practice data is stored locally on this device, in your browser's `localStorage`. Nothing is
-ever sent to a server — there isn't one. No analytics, no tracking scripts, no third-party
-services of any kind.
+Your practice data is stored locally on this device, in your browser's `localStorage`, by default.
+No analytics, no tracking scripts, no third-party services beyond what you explicitly opt into. The
+only exception is the optional cloud sync described above: if (and only if) you create an account,
+your progress is also stored in your own Supabase project, protected by Row Level Security so only
+you can read or write it — see [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md).

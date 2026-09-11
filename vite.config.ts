@@ -10,12 +10,12 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "robots.txt"],
       manifest: {
-        name: "Kofi Emma (Abele Drums Coach)",
+        name: "Abele Drums Coach",
         short_name: "Abele Drums Coach",
         description:
           "Premium Ghanaian gospel drum practice coach. 100% client-side — your practice data never leaves this device.",
-        theme_color: "#0B0B0C",
-        background_color: "#0B0B0C",
+        theme_color: "#0B0D0F",
+        background_color: "#0B0D0F",
         display: "standalone",
         orientation: "portrait",
         start_url: "/",

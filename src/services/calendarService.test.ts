@@ -35,7 +35,7 @@ describe("calendarService", () => {
     expect(ics).toContain("END:VALARM");
     expect(ics.trim().endsWith("END:VCALENDAR")).toBe(true);
     expect(ics).toMatch(/DTSTART:\d{8}T\d{6}Z/);
-    expect(ics).toContain("SUMMARY:Kofi Emma — Today's Shed");
+    expect(ics).toContain("SUMMARY:Abele Drums Coach — Today's Shed");
   });
 
   it("builds recurring daily morning and evening reminder events with RRULE", () => {

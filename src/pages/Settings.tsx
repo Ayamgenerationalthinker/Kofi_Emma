@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
-import { Download, Upload, Trash2, BellRing, ExternalLink } from "lucide-react";
+import { Download, Upload, Trash2, BellRing, ExternalLink, Cloud, CloudOff } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
+import { useAuth } from "../context/AuthContext";
 import { useLocalDbVersion } from "../hooks/useLocalDb";
 import { updateUser } from "../services/profileService";
 import { getSettings, updateSettings, getReminderSettings, updateReminderSettings } from "../services/settingsService";
@@ -9,17 +10,20 @@ import { resetProgress } from "../services/dataService";
 import { isNotificationSupported, requestNotificationPermission } from "../lib/notifications";
 import { AppError } from "../lib/errors";
 import { ConfirmSheet } from "../components/ui/ConfirmSheet";
+import { AccountSheet } from "../components/account/AccountSheet";
 import { KOFI_EMMA_CHANNEL_URL } from "../data/kofiEmmaVideos";
 import type { User } from "../lib/types";
 
-// Profile, practice defaults, notifications, theme, and data
-// (export/import/reset). Everything here is stored locally on this device —
-// no analytics, no third-party sync, no server involved at all.
+// Profile, practice defaults, notifications, theme, account, and data
+// (export/import/reset). Account sync is optional and secondary — this
+// page never needs to be visited for the app to work.
 export function Settings() {
   const { user } = useAppContext();
+  const { cloudAvailable, user: cloudUser } = useAuth();
   useLocalDbVersion();
   const settings = getSettings();
   const reminderSettings = getReminderSettings();
+  const [accountSheetOpen, setAccountSheetOpen] = useState(false);
 
   const [name, setName] = useState(user!.name);
   const [experienceLevel, setExperienceLevel] = useState<User["experienceLevel"]>(user!.experienceLevel);
@@ -80,6 +84,26 @@ export function Settings() {
         <button type="button" onClick={handleSaveProfile} className="rounded-md bg-gold-500 px-4 py-2 text-sm font-bold text-charcoal-950 hover:bg-gold-400">
           Save Profile
         </button>
+      </SettingsSection>
+
+      <SettingsSection title="Account">
+        {cloudAvailable ? (
+          <button
+            type="button"
+            onClick={() => setAccountSheetOpen(true)}
+            className="flex min-h-[44px] w-full items-center gap-3 rounded-md border border-charcoal-600 px-3 py-2 text-left hover:border-gold-500"
+          >
+            {cloudUser ? <Cloud className="h-4 w-4 text-gold-400" /> : <CloudOff className="h-4 w-4 text-parchment/40" />}
+            <span className="min-w-0">
+              <span className="block text-sm font-medium">{cloudUser ? cloudUser.email : "Not signed in"}</span>
+              <span className="block text-xs text-parchment/50">{cloudUser ? "Synced across devices" : "Tap to create an account or sign in"}</span>
+            </span>
+          </button>
+        ) : (
+          <p className="flex items-center gap-2 text-sm text-parchment/50">
+            <CloudOff className="h-4 w-4 shrink-0" /> Cloud sync isn't configured on this deployment. Your progress still saves on this device.
+          </p>
+        )}
       </SettingsSection>
 
       <SettingsSection title="Practice">
@@ -217,7 +241,7 @@ export function Settings() {
       </SettingsSection>
 
       <SettingsSection title="About">
-        <p className="text-sm font-bold">Kofi Emma (Abele Drums Coach)</p>
+        <p className="text-sm font-bold">Abele Drums Coach</p>
         <p className="text-sm text-parchment/60">
           An independent drum-learning application inspired by Ghanaian gospel drumming study and public
           performances. Built as a personal Ghanaian gospel drum practice system.
@@ -244,6 +268,8 @@ export function Settings() {
         description="This will permanently erase your local practice history, BPM records, level progress, and preferences on this device."
         confirmLabel="Reset Progress"
       />
+
+      <AccountSheet open={accountSheetOpen} onClose={() => setAccountSheetOpen(false)} />
 
       <style>{`.input { width: 100%; border-radius: 0.375rem; border: 1px solid #38383E; background: #0B0B0C; padding: 0.5rem 0.75rem; }`}</style>
     </div>

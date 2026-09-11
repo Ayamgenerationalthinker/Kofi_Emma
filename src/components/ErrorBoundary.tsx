@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    console.error("Unhandled error in Kofi Emma (Abele Drums Coach):", error, info.componentStack);
+    console.error("Unhandled error in Abele Drums Coach:", error, info.componentStack);
   }
 
   render() {
