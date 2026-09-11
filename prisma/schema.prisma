@@ -1,0 +1,225 @@
+// Gospel Drum Coach — Prisma schema
+// Single local user for the MVP; the schema is shaped so a `userId` foreign key
+// can support multiple users later without structural changes.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(uuid())
+  name             String
+  experienceLevel  String   @default("INTERMEDIATE") // BEGINNER | INTERMEDIATE | ADVANCED
+  timezone         String   @default("Africa/Accra")
+  onboardedAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  progress         UserExerciseProgress[]
+  sessions         PracticeSession[]
+  attempts         ExerciseAttempt[]
+  bpmRecords       BpmRecord[]
+  dailyLessons     DailyLesson[]
+  reminderSettings ReminderSettings?
+  calendarSettings CalendarSettings?
+  settings         UserSettings?
+}
+
+model CurriculumPhase {
+  id          String   @id // e.g. "phase-1"
+  number      Int      @unique
+  title       String
+  subtitle    String
+  description String
+  sortOrder   Int
+
+  exercises   Exercise[]
+}
+
+model Exercise {
+  id                              String   @id // e.g. "P1-E01"
+  phaseId                         String
+  phase                           CurriculumPhase @relation(fields: [phaseId], references: [id])
+
+  name                            String
+  slug                            String   @unique
+  description                     String
+  purpose                         String
+  category                        String   // HIGH_LIFE | PRAISE | WORSHIP | SIX_EIGHT | TWELVE_EIGHT | TRANSITION | TECHNIQUE | INDEPENDENCE | SOLOING
+  timeSignature                   String   // "4/4" | "6/8" | "12/8"
+  subdivision                     String   // "quarter" | "8th" | "16th" | "triplet"
+
+  stickingPattern                 String   // e.g. "R L K K R L"
+  orchestrationJson               String   // JSON array mapping each sticking token to a drum voice
+  patternEventsJson                String   // JSON MetronomePattern events for the visualizer/scheduler
+
+  techniqueNotes                  String
+  commonMistakes                  String   // newline separated
+
+  targetBpm                       Int
+  minimumBpm                      Int
+  maximumBpm                      Int
+  minimumAccuracy                 Int      // 0-100
+  requiredConsecutiveCleanAttempts Int     @default(2)
+
+  durationMinutes                 Int
+  difficulty                      Int      // 1-5
+  sortOrder                       Int
+  styleLabel                      String   @default("Kofi Emma-inspired") // attribution label, see section 2
+
+  prerequisitesOf   ExercisePrerequisite[] @relation("ExercisePrereqOf")
+  prerequisiteFor   ExercisePrerequisite[] @relation("PrerequisiteFor")
+
+  progress          UserExerciseProgress[]
+  attempts          ExerciseAttempt[]
+  bpmRecords        BpmRecord[]
+
+  @@index([phaseId])
+}
+
+// Exercise `exerciseId` requires `prerequisiteId` to be MASTERED first.
+model ExercisePrerequisite {
+  id              String   @id @default(uuid())
+  exerciseId      String
+  exercise        Exercise @relation("ExercisePrereqOf", fields: [exerciseId], references: [id])
+  prerequisiteId  String
+  prerequisite    Exercise @relation("PrerequisiteFor", fields: [prerequisiteId], references: [id])
+
+  @@unique([exerciseId, prerequisiteId])
+  @@index([exerciseId])
+  @@index([prerequisiteId])
+}
+
+model UserExerciseProgress {
+  id                    String   @id @default(uuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id])
+  exerciseId            String
+  exercise              Exercise @relation(fields: [exerciseId], references: [id])
+
+  status                String   @default("LOCKED") // LOCKED | AVAILABLE | IN_PROGRESS | REPEAT | MASTERED
+  cleanBpm              Int      @default(0)
+  bestAccuracy          Int      @default(0)
+  consecutiveCleanCount Int      @default(0)
+  attemptsCount         Int      @default(0)
+  masteredAt            DateTime?
+  updatedAt             DateTime @updatedAt
+  createdAt             DateTime @default(now())
+
+  @@unique([userId, exerciseId])
+  @@index([userId])
+}
+
+model PracticeSession {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  date         DateTime // calendar date (local midnight) this session belongs to
+  status       String   @default("PLANNED") // PLANNED | IN_PROGRESS | COMPLETED | MISSED
+  totalMinutes Int      @default(55)
+  startedAt    DateTime?
+  completedAt  DateTime?
+  dailyLessonId String? @unique
+  dailyLesson  DailyLesson? @relation(fields: [dailyLessonId], references: [id])
+
+  attempts     ExerciseAttempt[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId, date])
+}
+
+model ExerciseAttempt {
+  id                String   @id @default(uuid())
+  clientAttemptId   String   @unique // idempotency key generated by the client
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  exerciseId        String
+  exercise          Exercise @relation(fields: [exerciseId], references: [id])
+  sessionId         String?
+  session           PracticeSession? @relation(fields: [sessionId], references: [id])
+
+  targetBpm         Int
+  cleanBpm          Int
+  maximumBpm         Int?
+  accuracy          Int      // 0-100
+  durationMinutes   Int
+  perceivedDifficulty Int    @default(3) // 1-5
+  notes             String?
+
+  result            String   // FAILED | REPEAT | PASSED | MASTERED
+  recommendation    String
+
+  createdAt         DateTime @default(now())
+
+  @@index([userId, exerciseId])
+  @@index([userId, createdAt])
+}
+
+model DailyLesson {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  date          DateTime // local calendar date this plan is for
+  totalMinutes  Int      @default(55)
+  phaseId       String
+  wasRecoverySession Boolean @default(false)
+  lessonPartsJson String // JSON array of the 4 generated lesson parts
+  createdAt     DateTime @default(now())
+
+  session       PracticeSession?
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model BpmRecord {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  exerciseId  String
+  exercise    Exercise @relation(fields: [exerciseId], references: [id])
+  cleanBpm    Int
+  accuracy    Int
+  recordedAt  DateTime @default(now())
+
+  @@index([userId, exerciseId, recordedAt])
+}
+
+model ReminderSettings {
+  id               String  @id @default(uuid())
+  userId           String  @unique
+  user             User    @relation(fields: [userId], references: [id])
+  notificationsOn  Boolean @default(true)
+  morningOn        Boolean @default(true)
+  eveningOn        Boolean @default(true)
+  morningTime      String  @default("07:00")
+  eveningTime      String  @default("19:00")
+  updatedAt        DateTime @updatedAt
+}
+
+model CalendarSettings {
+  id        String  @id @default(uuid())
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id])
+  timezone  String  @default("Africa/Accra")
+  updatedAt DateTime @updatedAt
+}
+
+model UserSettings {
+  id                     String  @id @default(uuid())
+  userId                 String  @unique
+  user                   User    @relation(fields: [userId], references: [id])
+  preferredDurationMinutes Int   @default(55)
+  defaultBpmIncrease     Int     @default(5)
+  accuracyThreshold      Int     @default(90)
+  metronomeVolume        Int     @default(80)
+  theme                  String  @default("system") // light | dark | system
+  updatedAt              DateTime @updatedAt
+}
