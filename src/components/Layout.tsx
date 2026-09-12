@@ -29,23 +29,25 @@ export function Layout() {
   useLocalDbVersion();
   const state = getCurriculumState();
 
-  if (immersive) {
-    return (
-      <div className="min-h-screen bg-charcoal-950 text-parchment">
-        <main className="mx-auto max-w-2xl px-4 py-4" style={{ paddingTop: "calc(1rem + var(--safe-area-top))" }}>
-          <Outlet />
-        </main>
-      </div>
-    );
-  }
-
+  // The immersive toggle must only ever change styling, never the shape of
+  // the tree around <Outlet />: an earlier version returned two structurally
+  // different trees (one with header/nav, one without), which made React
+  // unmount and remount the routed page — including all of its local state
+  // (e.g. Practice.tsx's in-progress session stage) — the instant a lesson
+  // part started and immersive flipped to true. Header/bottom-nav are now
+  // just hidden, and <main>/<Outlet /> always sit in the same position.
   return (
     <div className="min-h-screen bg-charcoal-950 text-parchment">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-gold-500 focus:px-3 focus:py-2 focus:text-charcoal-950">
+      <a
+        href="#main-content"
+        hidden={immersive}
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-gold-500 focus:px-3 focus:py-2 focus:text-charcoal-950"
+      >
         Skip to content
       </a>
 
       <header
+        hidden={immersive}
         className="sticky top-0 z-40 border-b border-charcoal-800 bg-charcoal-950/95 backdrop-blur"
         style={{ paddingTop: "var(--safe-area-top)" }}
       >
@@ -86,11 +88,15 @@ export function Layout() {
         </nav>
       </header>
 
-      <main id="main-content" className="mx-auto max-w-6xl px-4 pb-24 pt-6 md:pb-10">
+      <main
+        id="main-content"
+        className={immersive ? "mx-auto max-w-2xl px-4 py-4" : "mx-auto max-w-6xl px-4 pb-24 pt-6 md:pb-10"}
+        style={immersive ? { paddingTop: "calc(1rem + var(--safe-area-top))" } : undefined}
+      >
         <Outlet />
       </main>
 
-      <div className="md:hidden">
+      <div className="md:hidden" hidden={immersive}>
         <BottomNav />
       </div>
     </div>

@@ -84,7 +84,9 @@ export function Shed() {
 
       <section>
         <h2 className="mb-2 text-xs uppercase tracking-widest text-gold-400">Featured Video</h2>
-        <VideoCard video={featured} study={getVideoStudy(featured.youtubeId)} onOpen={() => setOpenVideo(featured)} />
+        <div className="sm:max-w-xs">
+          <VideoCard video={featured} study={getVideoStudy(featured.youtubeId)} onOpen={() => setOpenVideo(featured)} />
+        </div>
       </section>
 
       <section className="rounded-xl border border-charcoal-700 bg-charcoal-900/50 p-4">
@@ -140,7 +142,7 @@ export function Shed() {
             No videos match this filter yet.
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {filtered.map((video) => (
               <VideoCard key={video.youtubeId} video={video} study={getVideoStudy(video.youtubeId)} onOpen={() => setOpenVideo(video)} />
             ))}
