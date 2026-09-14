@@ -166,7 +166,7 @@ export function Dashboard() {
       </section>
 
       {/* 2. CONTINUE LEARNING NEXT LESSON */}
-      {nextExercise && (
+      {nextExercise && nextExercise.exercise.id !== currentExercise?.exerciseId && (
         <section className="rounded-2xl border border-charcoal-700 bg-charcoal-900/60 p-5">
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
