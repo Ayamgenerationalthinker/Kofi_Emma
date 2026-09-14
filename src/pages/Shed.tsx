@@ -9,15 +9,18 @@ import {
   Play,
   Square,
   Sparkles,
-  Volume2,
-  VolumeX,
   Shuffle,
   Clock,
-  Music,
   Video,
-  Radio,
   Sliders,
   CheckCircle2,
+  FastForward,
+  Footprints,
+  Drum,
+  Layers,
+  Headphones,
+  Church,
+  ChevronRight,
 } from "lucide-react";
 import { KOFI_EMMA_VIDEOS, VIDEO_CATEGORIES, KOFI_EMMA_CHANNEL_URL, type KofiEmmaVideo } from "../data/kofiEmmaVideos";
 import { getVideoStudy } from "../services/videoStudyService";
@@ -187,7 +190,6 @@ export function Shed() {
         if (step.index === 0) {
           currentBar = (currentBar % 4) + 1;
           if (currentBar === 4 && audioEngineRef.current) {
-            // Mute bar 4 for silent bar test
             audioEngineRef.current.setVolume(0);
           } else if (audioEngineRef.current) {
             audioEngineRef.current.setVolume(80);
@@ -232,16 +234,16 @@ export function Shed() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12 animate-in fade-in">
       {/* Header */}
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold-400">
             <Flame className="h-4 w-4" />
-            Musician's Laboratory
+            Musician's Suite
           </div>
-          <h1 className="mt-1 text-2xl font-black md:text-3xl">The Shed</h1>
-          <p className="mt-1 text-sm text-parchment/60">Experiment. Repeat. Improve. Take your groove to the next level.</p>
+          <h1 className="mt-1 text-2xl font-black md:text-3xl text-parchment">The Shed Laboratory</h1>
+          <p className="mt-1 text-sm text-parchment/60">Freeform practice, interactive trainers, and gospel backing tracks.</p>
         </div>
 
         {/* Tab Switcher */}
@@ -254,7 +256,7 @@ export function Shed() {
             }`}
           >
             <Sliders className="h-4 w-4" />
-            Shed Laboratory
+            Shed Labs
           </button>
           <button
             type="button"
@@ -271,9 +273,9 @@ export function Shed() {
 
       {activeTab === "LAB" ? (
         /* ================= SHED LABORATORY ================= */
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Main Lab Console */}
-          <div className="rounded-2xl border border-gold-500/30 bg-gradient-to-br from-charcoal-900 to-charcoal-950 p-6 md:p-8">
+          <div className="rounded-3xl border border-gold-500/30 bg-gradient-to-br from-charcoal-900 to-charcoal-950 p-6 md:p-8 shadow-2xl">
             <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
               <div>
                 <span className="text-xs font-bold uppercase tracking-widest text-gold-400">
@@ -284,7 +286,7 @@ export function Shed() {
                   <span className="text-lg font-bold text-gold-400">BPM</span>
                 </div>
                 <p className="mt-1 text-xs text-parchment/60">
-                  Session Timer: {Math.floor(elapsedSeconds / 60)}m {elapsedSeconds % 60}s / {sessionMinutes}m
+                  Session: {Math.floor(elapsedSeconds / 60)}m {elapsedSeconds % 60}s / {sessionMinutes}m
                 </p>
               </div>
 
@@ -293,16 +295,16 @@ export function Shed() {
                   <button
                     type="button"
                     onClick={startShedSession}
-                    className="flex min-h-[54px] items-center justify-center gap-3 rounded-xl bg-gold-500 px-8 py-3.5 text-base font-bold text-charcoal-950 shadow-lg shadow-gold-500/20 hover:bg-gold-400 active:scale-95"
+                    className="flex min-h-[52px] items-center justify-center gap-2.5 rounded-2xl bg-gold-500 px-8 py-3.5 text-base font-black text-charcoal-950 shadow-lg shadow-gold-500/20 hover:bg-gold-400 active:scale-95"
                   >
                     <Play className="h-5 w-5 fill-current" />
-                    ENTER SHED LAB
+                    START FREE SHED
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={stopShedSession}
-                    className="flex min-h-[54px] items-center justify-center gap-3 rounded-xl bg-danger px-8 py-3.5 text-base font-bold text-white shadow-lg shadow-danger/20 hover:opacity-90 active:scale-95"
+                    className="flex min-h-[52px] items-center justify-center gap-2.5 rounded-2xl bg-amber-500 px-8 py-3.5 text-base font-black text-charcoal-950 shadow-lg shadow-amber-500/20 hover:bg-amber-400 active:scale-95"
                   >
                     <Square className="h-5 w-5 fill-current" />
                     END SHED
@@ -312,22 +314,22 @@ export function Shed() {
                 <button
                   type="button"
                   onClick={generateRandomChallenge}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-charcoal-700 bg-charcoal-800/80 px-4 py-3 text-xs font-bold text-parchment hover:border-gold-500/40"
+                  className="flex items-center justify-center gap-2 rounded-2xl border border-charcoal-700 bg-charcoal-800/80 px-4 py-3 text-xs font-bold text-parchment hover:border-gold-500/40"
                 >
                   <Shuffle className="h-4 w-4 text-gold-400" />
-                  Random Challenge
+                  Random Drill
                 </button>
               </div>
             </div>
 
             {/* Active Random Challenge Alert */}
             {activeChallenge && (
-              <div className="mt-6 rounded-xl border border-gold-500/40 bg-gold-500/10 p-4">
+              <div className="mt-6 rounded-2xl border border-gold-500/40 bg-gold-500/10 p-4 animate-in fade-in">
                 <div className="flex items-start gap-3">
-                  <Sparkles className="h-5 w-5 shrink-0 text-gold-400" />
+                  <Sparkles className="h-5 w-5 shrink-0 text-gold-400 mt-0.5" />
                   <div>
-                    <span className="text-xs font-bold uppercase text-gold-400">Challenge: {activeChallenge.title}</span>
-                    <p className="mt-1 text-sm font-semibold text-parchment">{activeChallenge.instructions}</p>
+                    <span className="text-xs font-bold uppercase text-gold-400">Drill: {activeChallenge.title}</span>
+                    <p className="mt-0.5 text-sm font-semibold text-parchment">{activeChallenge.instructions}</p>
                   </div>
                 </div>
               </div>
@@ -344,18 +346,18 @@ export function Shed() {
                   disabled={isShedding}
                   className="h-4 w-4 rounded accent-gold-500"
                 />
-                <label htmlFor="silent-bars" className="font-semibold text-parchment/80">
+                <label htmlFor="silent-bars" className="font-semibold text-parchment/80 cursor-pointer">
                   Inner Clock Test (Mute bar 4 of every 4 bars)
                 </label>
               </div>
-              <span className="text-parchment/40">Tests internal tempo stability</span>
+              <span className="text-parchment/40 hidden sm:inline">Tests internal timing stability</span>
             </div>
           </div>
 
           {/* Configuration Matrix */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {/* Style Selector */}
-            <div className="rounded-xl border border-charcoal-800 bg-charcoal-900/60 p-4">
+            <div className="rounded-2xl border border-charcoal-800 bg-charcoal-900/60 p-4">
               <span className="text-xs font-bold uppercase tracking-wider text-parchment/50">1. Musical Style</span>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {(["Gospel", "Praise", "Worship", "Highlife", "Afro-Gospel"] as ShedStyle[]).map((style) => (
@@ -364,10 +366,10 @@ export function Shed() {
                     type="button"
                     disabled={isShedding}
                     onClick={() => setSelectedStyle(style)}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
+                    className={`rounded-xl px-2.5 py-1 text-xs font-bold transition ${
                       selectedStyle === style
                         ? "bg-gold-500 text-charcoal-950"
-                        : "border border-charcoal-700 bg-charcoal-800 text-parchment/60"
+                        : "border border-charcoal-700 bg-charcoal-800 text-parchment/60 hover:text-parchment"
                     }`}
                   >
                     {style}
@@ -377,7 +379,7 @@ export function Shed() {
             </div>
 
             {/* Meter Selector */}
-            <div className="rounded-xl border border-charcoal-800 bg-charcoal-900/60 p-4">
+            <div className="rounded-2xl border border-charcoal-800 bg-charcoal-900/60 p-4">
               <span className="text-xs font-bold uppercase tracking-wider text-parchment/50">2. Time Signature</span>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {(["4/4", "3/4", "6/8", "12/8", "7/8"] as TimeSignature[]).map((ts) => (
@@ -386,10 +388,10 @@ export function Shed() {
                     type="button"
                     disabled={isShedding}
                     onClick={() => setSelectedMeter(ts)}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
+                    className={`rounded-xl px-2.5 py-1 text-xs font-bold transition ${
                       selectedMeter === ts
                         ? "bg-gold-500 text-charcoal-950"
-                        : "border border-charcoal-700 bg-charcoal-800 text-parchment/60"
+                        : "border border-charcoal-700 bg-charcoal-800 text-parchment/60 hover:text-parchment"
                     }`}
                   >
                     {ts}
@@ -399,10 +401,10 @@ export function Shed() {
             </div>
 
             {/* Tempo Slider */}
-            <div className="rounded-xl border border-charcoal-800 bg-charcoal-900/60 p-4">
+            <div className="rounded-2xl border border-charcoal-800 bg-charcoal-900/60 p-4">
               <div className="flex justify-between text-xs font-bold uppercase text-parchment/50">
                 <span>3. Tempo</span>
-                <span className="text-gold-400">{bpm} BPM</span>
+                <span className="text-gold-400 font-mono text-sm">{bpm} BPM</span>
               </div>
               <input
                 type="range"
@@ -412,13 +414,13 @@ export function Shed() {
                 disabled={isShedding}
                 value={bpm}
                 onChange={(e) => setBpm(Number(e.target.value))}
-                className="mt-4 w-full accent-gold-500"
+                className="mt-3 w-full accent-gold-500 cursor-pointer"
               />
             </div>
 
             {/* Session Duration */}
-            <div className="rounded-xl border border-charcoal-800 bg-charcoal-900/60 p-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-parchment/50">4. Session Duration</span>
+            <div className="rounded-2xl border border-charcoal-800 bg-charcoal-900/60 p-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-parchment/50">4. Duration</span>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {[5, 10, 20, 30].map((mins) => (
                   <button
@@ -426,10 +428,10 @@ export function Shed() {
                     type="button"
                     disabled={isShedding}
                     onClick={() => setSessionMinutes(mins)}
-                    className={`rounded-lg px-3 py-1 text-xs font-bold ${
+                    className={`rounded-xl px-3 py-1 text-xs font-bold transition ${
                       sessionMinutes === mins
                         ? "bg-gold-500 text-charcoal-950"
-                        : "border border-charcoal-700 bg-charcoal-800 text-parchment/60"
+                        : "border border-charcoal-700 bg-charcoal-800 text-parchment/60 hover:text-parchment"
                     }`}
                   >
                     {mins}m
@@ -438,24 +440,160 @@ export function Shed() {
               </div>
             </div>
           </div>
+
+          {/* ================= 4 STRUCTURED PEDAGOGICAL LABS ================= */}
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gold-400">
+                Specialized Training Laboratories
+              </h2>
+              <p className="mt-0.5 text-xs text-parchment/60">Targeted tools categorized by musical discipline.</p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {/* PILLAR 1: BUILD SPEED */}
+              <div className="rounded-3xl border border-charcoal-700 bg-charcoal-900/60 p-5 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
+                  <FastForward className="h-4 w-4" /> 1. Build Speed & Stamina
+                </div>
+
+                <div className="grid gap-2">
+                  <Link
+                    to="/tempo-builder"
+                    className="flex items-center justify-between rounded-2xl border border-charcoal-800 bg-charcoal-950/80 p-3.5 hover:border-gold-500/40 transition group"
+                  >
+                    <div>
+                      <h3 className="text-sm font-bold text-parchment group-hover:text-gold-300">Tempo Builder</h3>
+                      <p className="text-xs text-parchment/50">Automated speed ramps and BPM endurance ladders.</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-parchment/40 group-hover:text-gold-400 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
+                  <Link
+                    to="/double-bass"
+                    className="flex items-center justify-between rounded-2xl border border-charcoal-800 bg-charcoal-950/80 p-3.5 hover:border-gold-500/40 transition group"
+                  >
+                    <div>
+                      <h3 className="text-sm font-bold text-parchment group-hover:text-gold-300">Double Bass School</h3>
+                      <p className="text-xs text-parchment/50">Pedal setup, slide double strokes, and speed bursts.</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-parchment/40 group-hover:text-gold-400 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* PILLAR 2: BUILD VOCABULARY */}
+              <div className="rounded-3xl border border-charcoal-700 bg-charcoal-900/60 p-5 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-gold-400 uppercase tracking-wider">
+                  <Drum className="h-4 w-4" /> 2. Build Vocabulary & Chops
+                </div>
+
+                <div className="grid gap-2">
+                  <Link
+                    to="/rudiments"
+                    className="flex items-center justify-between rounded-2xl border border-charcoal-800 bg-charcoal-950/80 p-3.5 hover:border-gold-500/40 transition group"
+                  >
+                    <div>
+                      <h3 className="text-sm font-bold text-parchment group-hover:text-gold-300">40 PAS Rudiments</h3>
+                      <p className="text-xs text-parchment/50">Rolls, paradiddles, flams, and drags with audio demo.</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-parchment/40 group-hover:text-gold-400 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
+                  <Link
+                    to="/fills"
+                    className="flex items-center justify-between rounded-2xl border border-charcoal-800 bg-charcoal-950/80 p-3.5 hover:border-gold-500/40 transition group"
+                  >
+                    <div>
+                      <h3 className="text-sm font-bold text-parchment group-hover:text-gold-300">Fill Trainer</h3>
+                      <p className="text-xs text-parchment/50">Groove &rarr; Fill &rarr; Return to Groove loop mastery.</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-parchment/40 group-hover:text-gold-400 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* PILLAR 3: BUILD MUSICALITY */}
+              <div className="rounded-3xl border border-charcoal-700 bg-charcoal-900/60 p-5 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider">
+                  <Layers className="h-4 w-4" /> 3. Build Musicality & Flow
+                </div>
+
+                <div className="grid gap-2">
+                  <Link
+                    to="/transitions"
+                    className="flex items-center justify-between rounded-2xl border border-charcoal-800 bg-charcoal-950/80 p-3.5 hover:border-gold-500/40 transition group"
+                  >
+                    <div>
+                      <h3 className="text-sm font-bold text-parchment group-hover:text-gold-300">Transition Trainer</h3>
+                      <p className="text-xs text-parchment/50">Seamless 4/4 to 6/8 and worship-to-praise energy flow.</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-parchment/40 group-hover:text-gold-400 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
+                  <Link
+                    to="/call-and-response"
+                    className="flex items-center justify-between rounded-2xl border border-charcoal-800 bg-charcoal-950/80 p-3.5 hover:border-gold-500/40 transition group"
+                  >
+                    <div>
+                      <h3 className="text-sm font-bold text-parchment group-hover:text-gold-300">Call & Response</h3>
+                      <p className="text-xs text-parchment/50">Ear-training playback: hear phrases and reproduce them.</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-parchment/40 group-hover:text-gold-400 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* PILLAR 4: BUILD PERFORMANCE */}
+              <div className="rounded-3xl border border-charcoal-700 bg-charcoal-900/60 p-5 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                  <Church className="h-4 w-4" /> 4. Build Performance & Church Service
+                </div>
+
+                <div className="grid gap-2">
+                  <Link
+                    to="/live-church"
+                    className="flex items-center justify-between rounded-2xl border border-charcoal-800 bg-charcoal-950/80 p-3.5 hover:border-gold-500/40 transition group"
+                  >
+                    <div>
+                      <h3 className="text-sm font-bold text-parchment group-hover:text-gold-300">Live Church Simulator</h3>
+                      <p className="text-xs text-parchment/50">Service flow, worship drops, and live Music Director cues.</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-parchment/40 group-hover:text-gold-400 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
+                  <Link
+                    to="/shed-tracks"
+                    className="flex items-center justify-between rounded-2xl border border-charcoal-800 bg-charcoal-950/80 p-3.5 hover:border-gold-500/40 transition group"
+                  >
+                    <div>
+                      <h3 className="text-sm font-bold text-parchment group-hover:text-gold-300">Shed Tracks & Stem Mixer</h3>
+                      <p className="text-xs text-parchment/50">Full-band backing tracks with drums-mute stem isolation.</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-parchment/40 group-hover:text-gold-400 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         /* ================= VIDEO MASTERCLASSES ================= */
         <div className="space-y-6">
           {!online && (
-            <div className="flex items-center gap-2 rounded-lg border border-amber-600/50 bg-amber-950/30 px-4 py-3 text-sm text-amber-300">
+            <div className="flex items-center gap-2 rounded-2xl border border-amber-600/50 bg-amber-950/30 px-4 py-3 text-sm text-amber-300">
               <WifiOff className="h-4 w-4 shrink-0" />
-              Video unavailable offline. Your practice tools and curriculum continue to work offline.
+              Video streaming requires an Internet connection. All procedural drum tools and curriculum work 100% offline.
             </div>
           )}
 
           <Link
             to="/shed-tracks"
-            className="flex items-center gap-3 rounded-xl border border-charcoal-700 bg-charcoal-900/50 p-4 hover:border-gold-500/50"
+            className="flex items-center gap-3 rounded-2xl border border-charcoal-700 bg-charcoal-900/60 p-4 hover:border-gold-500/50 transition"
           >
             <Guitar className="h-6 w-6 shrink-0 text-gold-400" aria-hidden="true" />
             <div>
-              <h2 className="font-bold">Shed Tracks</h2>
+              <h2 className="font-bold text-parchment">Shed Tracks & Stem Mixer</h2>
               <p className="text-xs text-parchment/50">Full-band backing tracks. Mute the drums, loop a section, play along.</p>
             </div>
           </Link>
@@ -467,25 +605,6 @@ export function Shed() {
             </div>
           </section>
 
-          <section className="rounded-xl border border-charcoal-700 bg-charcoal-900/50 p-4">
-            <p className="text-sm text-parchment/70">
-              Don't just watch the drummer. Study the movement. Find the subdivision. Find the sticking. Take the idea to your kit.
-            </p>
-            <p className="mt-2 text-xs text-parchment/50">
-              An independent drum-learning application inspired by Ghanaian gospel drumming study and public performances. Videos are embedded
-              from YouTube and remain the property of their respective creators.
-            </p>
-            <a
-              href={KOFI_EMMA_CHANNEL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-1.5 text-xs text-gold-400 hover:text-gold-300"
-            >
-              Search more performances on YouTube
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-            </a>
-          </section>
-
           <section className="space-y-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="relative flex-1 sm:max-w-xs">
@@ -494,9 +613,9 @@ export function Shed() {
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search by title, song, tag..."
+                  placeholder="Search by title, style, tag..."
                   aria-label="Search videos"
-                  className="w-full rounded-lg border border-charcoal-700 bg-charcoal-900/70 py-2 pl-9 pr-3 text-sm placeholder:text-parchment/40 focus:border-gold-500 focus:outline-none"
+                  className="w-full rounded-xl border border-charcoal-700 bg-charcoal-900/70 py-2 pl-9 pr-3 text-sm placeholder:text-parchment/40 focus:border-gold-500 focus:outline-none"
                 />
               </div>
               <div className="flex flex-wrap gap-1" role="tablist" aria-label="Filter videos">
@@ -506,7 +625,7 @@ export function Shed() {
                     role="tab"
                     aria-selected={filter === cat}
                     onClick={() => setFilter(cat)}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                       filter === cat ? "bg-gold-500 text-charcoal-950" : "bg-charcoal-800 text-parchment/70 hover:text-parchment"
                     }`}
                   >

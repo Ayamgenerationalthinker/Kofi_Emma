@@ -6,6 +6,7 @@ import {
   Square,
   CheckCircle2,
   ExternalLink,
+  Zap,
 } from "lucide-react";
 import { getRudimentById } from "../data/rudiments";
 import { RudimentAudioEngine, type RudimentPlayMode } from "../audio/RudimentAudioEngine";
@@ -43,6 +44,10 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
   const [activeStrokeIndex, setActiveStrokeIndex] = useState(-1);
   const [countInBeat, setCountInBeat] = useState<number | null>(null);
 
+  // Open-Close-Open (OCO) automated tempo ramp mode
+  const [isOcoMode, setIsOcoMode] = useState(false);
+  const [ocoStage, setOcoStage] = useState<"IDLE" | "ACCEL" | "PEAK" | "DECEL">("IDLE");
+
   // Practice Timer
   const [practiceSeconds, setPracticeSeconds] = useState(0);
   const [sessionCompleted, setSessionCompleted] = useState(false);
@@ -50,6 +55,12 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
   const audioEngineRef = useRef<AudioEngine | null>(null);
   const rudimentEngineRef = useRef<RudimentAudioEngine | null>(null);
   const timerRef = useRef<number | null>(null);
+  const ocoIntervalRef = useRef<number | null>(null);
+  const bpmRef = useRef(bpm);
+
+  useEffect(() => {
+    bpmRef.current = bpm;
+  }, [bpm]);
 
   useEffect(() => {
     const audio = new AudioEngine();
@@ -72,6 +83,7 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
       engine.dispose();
       audio.dispose();
       if (timerRef.current) clearInterval(timerRef.current);
+      if (ocoIntervalRef.current) clearInterval(ocoIntervalRef.current);
     };
   }, []);
 
@@ -84,12 +96,39 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
     setIsPlaying(true);
     setSessionCompleted(false);
 
-    await rudimentEngineRef.current.start(rudiment, bpm, mode, countInBars, useLeftLead);
+    const startBpm = isOcoMode ? rudiment.minBpm : bpm;
+    if (isOcoMode) {
+      setBpm(rudiment.minBpm);
+      setOcoStage("ACCEL");
+    }
+
+    await rudimentEngineRef.current.start(rudiment, startBpm, mode, countInBars, useLeftLead);
 
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = window.setInterval(() => {
       setPracticeSeconds((s) => s + 1);
     }, 1000);
+
+    // OCO automated ramping
+    if (isOcoMode) {
+      if (ocoIntervalRef.current) clearInterval(ocoIntervalRef.current);
+      let direction = 1; // 1 = accelerating, -1 = decelerating
+
+      ocoIntervalRef.current = window.setInterval(() => {
+        const nextBpm = bpmRef.current + direction * 2;
+        if (direction === 1 && nextBpm >= rudiment.maxBpm) {
+          direction = -1;
+          setOcoStage("DECEL");
+          handleBpmChange(rudiment.maxBpm);
+        } else if (direction === -1 && nextBpm <= rudiment.minBpm) {
+          handleBpmChange(rudiment.minBpm);
+          setOcoStage("IDLE");
+          stopPlayback();
+        } else {
+          handleBpmChange(nextBpm);
+        }
+      }, 3000);
+    }
   };
 
   const stopPlayback = () => {
@@ -100,9 +139,14 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    if (ocoIntervalRef.current) {
+      clearInterval(ocoIntervalRef.current);
+      ocoIntervalRef.current = null;
+    }
     setIsPlaying(false);
     setActiveStrokeIndex(-1);
     setCountInBeat(null);
+    setOcoStage("IDLE");
   };
 
   const handleBpmChange = (newBpm: number) => {
@@ -128,7 +172,7 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
       cleanBpm: bpm,
       accuracy: 94,
       durationMinutes: Math.max(1, Math.round(practiceSeconds / 60)),
-      notes: `PAS #${rudiment.number} ${rudiment.name} (${mode} mode @ ${bpm} BPM, ${practiceSeconds}s)`,
+      notes: `PAS #${rudiment.number} ${rudiment.name} (${mode} mode @ ${bpm} BPM, ${practiceSeconds}s${isOcoMode ? ", OCO Auto-Ramp" : ""})`,
     });
     setSessionCompleted(true);
   };
@@ -136,12 +180,12 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
   const activeStrokes = useLeftLead && rudiment.alternateStrokes ? rudiment.alternateStrokes : rudiment.strokes;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12 animate-in fade-in">
       {/* Top Navigation */}
       <div className="flex items-center justify-between">
         <Link
           to="/rudiments"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-parchment/60 hover:text-gold-400"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-parchment/60 hover:text-gold-400 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back to 40 Rudiments
         </Link>
@@ -161,12 +205,12 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
           </div>
 
           {/* Mode Selector Tabs */}
-          <div className="flex rounded-xl border border-charcoal-700 bg-charcoal-950/80 p-1">
+          <div className="flex rounded-2xl border border-charcoal-700 bg-charcoal-950/80 p-1">
             <button
               type="button"
               onClick={() => handleModeChange("LISTEN")}
               className={[
-                "rounded-lg px-3 py-1.5 text-xs font-bold transition",
+                "rounded-xl px-3 py-1.5 text-xs font-bold transition",
                 mode === "LISTEN" ? "bg-gold-500 text-charcoal-950" : "text-parchment/60 hover:text-parchment",
               ].join(" ")}
             >
@@ -176,7 +220,7 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
               type="button"
               onClick={() => handleModeChange("METRONOME_AND_RUDIMENT")}
               className={[
-                "rounded-lg px-3 py-1.5 text-xs font-bold transition",
+                "rounded-xl px-3 py-1.5 text-xs font-bold transition",
                 mode === "METRONOME_AND_RUDIMENT" ? "bg-gold-500 text-charcoal-950" : "text-parchment/60 hover:text-parchment",
               ].join(" ")}
             >
@@ -186,26 +230,26 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
               type="button"
               onClick={() => handleModeChange("PRACTICE")}
               className={[
-                "rounded-lg px-3 py-1.5 text-xs font-bold transition",
+                "rounded-xl px-3 py-1.5 text-xs font-bold transition",
                 mode === "PRACTICE" ? "bg-gold-500 text-charcoal-950" : "text-parchment/60 hover:text-parchment",
               ].join(" ")}
             >
-              Mode C: Practice (Mute)
+              Mode C: Practice
             </button>
           </div>
         </div>
 
-        {/* Count-In Banner if active */}
+        {/* Count-In Banner */}
         {countInBeat !== null && (
           <div className="mt-6 flex items-center justify-center rounded-2xl border border-gold-500 bg-gold-500/20 py-4 text-center animate-pulse">
-            <span className="font-display text-4xl font-black text-gold-300">
+            <span className="font-display text-3xl font-black text-gold-300 sm:text-4xl">
               COUNT-IN: {countInBeat}
             </span>
           </div>
         )}
 
-        {/* Interactive Sticking Notation Grid */}
-        <div className="mt-6 rounded-2xl border border-charcoal-800 bg-charcoal-950/90 p-6">
+        {/* Sticking Notation Grid */}
+        <div className="mt-6 rounded-2xl border border-charcoal-800 bg-charcoal-950/90 p-5 md:p-6">
           <div className="flex items-center justify-between text-xs text-parchment/50">
             <span>Sticking Pattern ({useLeftLead ? "Left Lead" : "Right Lead"})</span>
             {rudiment.alternateStrokes && (
@@ -260,7 +304,9 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
           {/* BPM Adjustment */}
           <div className="flex-1 space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-parchment/60">Practice Tempo</span>
+              <span className="font-semibold text-parchment/60">
+                {isOcoMode ? `Open-Close-Open Ramp (${ocoStage})` : "Practice Tempo"}
+              </span>
               <span className="font-mono text-lg font-black text-gold-400">{bpm} BPM</span>
             </div>
 
@@ -269,6 +315,7 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
               min={rudiment.minBpm}
               max={rudiment.maxBpm}
               value={bpm}
+              disabled={isPlaying && isOcoMode}
               onChange={(e) => handleBpmChange(Number(e.target.value))}
               className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-charcoal-800 accent-gold-500"
             />
@@ -278,8 +325,9 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
                 <button
                   key={delta}
                   type="button"
+                  disabled={isPlaying && isOcoMode}
                   onClick={() => handleBpmChange(bpm + delta)}
-                  className="rounded-lg border border-charcoal-700 bg-charcoal-800 px-2.5 py-1 text-xs font-bold text-parchment/80 hover:border-gold-500/40"
+                  className="rounded-lg border border-charcoal-700 bg-charcoal-800 px-2.5 py-1 text-xs font-bold text-parchment/80 hover:border-gold-500/40 disabled:opacity-40"
                 >
                   {delta > 0 ? `+${delta}` : delta}
                 </button>
@@ -289,10 +337,11 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
                 <button
                   key={preset}
                   type="button"
+                  disabled={isPlaying && isOcoMode}
                   onClick={() => handleBpmChange(preset)}
                   className={[
-                    "rounded-lg px-2.5 py-1 text-xs font-bold",
-                    bpm === preset ? "bg-gold-500 text-charcoal-950" : "bg-charcoal-800/60 text-parchment/50 hover:text-parchment",
+                    "rounded-lg px-2.5 py-1 text-xs font-bold transition",
+                    bpm === preset ? "bg-gold-500 text-charcoal-950" : "bg-charcoal-800/60 text-parchment/50 hover:text-parchment disabled:opacity-40",
                   ].join(" ")}
                 >
                   {preset}
@@ -303,15 +352,29 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
 
           {/* Count-In & Transport Buttons */}
           <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={isPlaying}
+              onClick={() => setIsOcoMode(!isOcoMode)}
+              className={[
+                "flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition",
+                isOcoMode ? "border-gold-500 bg-gold-500/20 text-gold-300" : "border-charcoal-700 bg-charcoal-900/60 text-parchment/60",
+              ].join(" ")}
+            >
+              <Zap className="h-3.5 w-3.5" />
+              OCO Ramp: {isOcoMode ? "ON" : "OFF"}
+            </button>
+
             <div className="flex items-center gap-1.5 rounded-xl border border-charcoal-700 bg-charcoal-900/60 px-3 py-2 text-xs">
               <span className="text-parchment/50">Count-In:</span>
               {[0, 1, 2].map((bars) => (
                 <button
                   key={bars}
                   type="button"
+                  disabled={isPlaying}
                   onClick={() => setCountInBars(bars)}
                   className={[
-                    "rounded px-2 py-0.5 font-bold",
+                    "rounded px-2 py-0.5 font-bold transition",
                     countInBars === bars ? "bg-gold-500 text-charcoal-950" : "text-parchment/60 hover:text-parchment",
                   ].join(" ")}
                 >
@@ -324,18 +387,18 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
               <button
                 type="button"
                 onClick={stopPlayback}
-                className="flex min-h-[50px] items-center gap-2 rounded-2xl bg-amber-500 px-8 py-3 text-sm font-black text-charcoal-950 shadow-lg shadow-amber-500/20 hover:bg-amber-400"
+                className="flex min-h-[48px] items-center gap-2 rounded-2xl bg-amber-500 px-8 py-3 text-sm font-black text-charcoal-950 shadow-lg shadow-amber-500/20 hover:bg-amber-400 active:scale-95"
               >
-                <Square className="h-5 w-5 fill-current" />
+                <Square className="h-4 w-4 fill-current" />
                 STOP
               </button>
             ) : (
               <button
                 type="button"
                 onClick={startPlayback}
-                className="flex min-h-[50px] items-center gap-2 rounded-2xl bg-gold-500 px-8 py-3 text-sm font-black text-charcoal-950 shadow-lg shadow-gold-500/20 hover:bg-gold-400"
+                className="flex min-h-[48px] items-center gap-2 rounded-2xl bg-gold-500 px-8 py-3 text-sm font-black text-charcoal-950 shadow-lg shadow-gold-500/20 hover:bg-gold-400 active:scale-95"
               >
-                <Play className="h-5 w-5 fill-current" />
+                <Play className="h-4 w-4 fill-current" />
                 START {mode === "PRACTICE" ? "PRACTICE" : "DEMO"}
               </button>
             )}
@@ -361,7 +424,7 @@ function RudimentPracticeStudio({ rudiment }: { rudiment: NonNullable<ReturnType
       {/* Challenge & Practice Logger */}
       <section className="flex flex-col justify-between gap-4 rounded-2xl border border-gold-500/30 bg-gold-500/5 p-6 sm:flex-row sm:items-center">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-gold-400">Mastery Target</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-gold-400">Mastery Challenge</span>
           <h4 className="mt-1 text-base font-bold text-parchment">{rudiment.challengeTarget}</h4>
           <p className="mt-0.5 text-xs text-parchment/60">
             Session timer: <strong className="text-parchment">{Math.floor(practiceSeconds / 60)}m {practiceSeconds % 60}s</strong>

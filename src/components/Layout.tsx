@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Link, Outlet } from "react-router-dom";
 import {
   LayoutDashboard,
   ListMusic,
@@ -25,8 +25,8 @@ import { PWAInstallBanner } from "./PWAInstallBanner";
 
 const DESKTOP_NAV_ITEMS = [
   { to: "/", label: "Home", icon: LayoutDashboard },
+  { to: "/learn", label: "Academy", icon: BookOpen },
   { to: "/practice", label: "Practice", icon: ListMusic },
-  { to: "/curriculum", label: "Curriculum", icon: BookOpen },
   { to: "/rudiments", label: "40 Rudiments", icon: Drum },
   { to: "/double-bass", label: "Double Bass", icon: Footprints },
   { to: "/live-church", label: "Live Church", icon: Church },
@@ -57,7 +57,7 @@ export function Layout() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-charcoal-950 text-parchment">
+    <div className="min-h-screen bg-charcoal-950 text-parchment flex flex-col justify-between">
       <a
         href="#main-content"
         hidden={immersive}
@@ -72,17 +72,17 @@ export function Layout() {
         style={{ paddingTop: "var(--safe-area-top)" }}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5">
-          <div className="flex items-baseline gap-2 leading-tight">
-            <span className="font-bold tracking-tight">Abele Drums Coach</span>
+          <Link to="/" className="flex items-baseline gap-2 leading-tight">
+            <span className="font-bold tracking-tight text-parchment">Abele Drums Coach</span>
             <span className="rounded-full border border-gold-600/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold-300">
               Level {state.currentPhaseNumber}
             </span>
-          </div>
+          </Link>
           <div className="flex items-center gap-2">
             {!isOnline && (
               <span className="flex items-center gap-1.5 rounded-full border border-blue-600/50 bg-blue-950/40 px-2.5 py-1 text-[11px] text-blue-300">
                 <WifiOff className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Offline Mode (Local)</span>
+                <span className="hidden sm:inline">Offline Mode (Local)</span>
               </span>
             )}
             {!storageAvailable && (
@@ -92,6 +92,13 @@ export function Layout() {
                 <span className="sm:hidden">Storage blocked</span>
               </span>
             )}
+            <Link
+              to="/settings"
+              aria-label="Settings"
+              className="rounded-full p-1.5 text-parchment/60 hover:bg-charcoal-800 hover:text-gold-300 md:hidden"
+            >
+              <SettingsIcon className="h-4 w-4" />
+            </Link>
           </div>
         </div>
         <nav aria-label="Primary" className="hidden border-t border-charcoal-800 md:block overflow-x-auto">
@@ -118,7 +125,7 @@ export function Layout() {
 
       <main
         id="main-content"
-        className={immersive ? "mx-auto max-w-2xl px-4 py-4" : "mx-auto max-w-6xl px-4 pb-24 pt-6 md:pb-10"}
+        className={immersive ? "mx-auto w-full max-w-2xl px-4 py-4" : "mx-auto w-full max-w-6xl px-4 pb-24 pt-6 md:pb-10"}
         style={immersive ? { paddingTop: "calc(1rem + var(--safe-area-top))" } : undefined}
       >
         <Outlet />
