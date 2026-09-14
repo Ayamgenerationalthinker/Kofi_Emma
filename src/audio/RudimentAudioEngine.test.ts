@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { RudimentAudioEngine } from "./RudimentAudioEngine";
 import { AudioEngine } from "./AudioEngine";
 import { PAS_RUDIMENTS, getRudimentById } from "../data/rudiments";

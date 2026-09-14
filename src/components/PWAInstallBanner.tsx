@@ -63,7 +63,7 @@ export function PWAInstallBanner() {
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
     };
-  }, []);
+  }, [isIos, isStandalone]);
 
   const handleInstallClick = async () => {
     if (isIos) {

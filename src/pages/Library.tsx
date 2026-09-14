@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { BookOpen, Music, Users, Sparkles, ShieldCheck, Heart, Radio, ChevronRight, Layers, Award } from "lucide-react";
+import { BookOpen, Video, ExternalLink, ChevronRight, ShieldCheck, Wifi } from "lucide-react";
+import { VERIFIED_RESOURCES, type VerifiedResource } from "../data/verifiedResources";
 
 interface Article {
   id: string;
@@ -81,13 +82,14 @@ const ARTICLES: Article[] = [
 ];
 
 export function Library() {
+  const [tab, setTab] = useState<"ARTICLES" | "VIDEOS">("ARTICLES");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
   const [activeArticle, setActiveArticle] = useState<Article | null>(null);
 
   const filteredArticles = selectedCategory === "ALL" ? ARTICLES : ARTICLES.filter((a) => a.category === selectedCategory);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gold-400">
@@ -96,95 +98,182 @@ export function Library() {
         </div>
         <h1 className="mt-1 text-2xl font-black md:text-3xl">Drummer's Library</h1>
         <p className="mt-1 text-sm text-parchment/60">
-          Master the art of church drumming beyond mechanics: dynamics, listening, Ghanaian highlife heritage, and musical maturity.
+          Master church drumming beyond mechanics: dynamics, rhythm section listening, Ghanaian highlife heritage, and verified masterclasses.
         </p>
       </div>
 
-      {/* Category Filter Chips */}
-      <div className="flex flex-wrap gap-2">
-        {["ALL", "Musicality", "Live Church", "Ghanaian Heritage", "Beginners"].map((cat) => (
-          <button
-            key={cat}
-            type="button"
-            onClick={() => {
-              setSelectedCategory(cat);
-              setActiveArticle(null);
-            }}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold uppercase tracking-wider ${
-              selectedCategory === cat
-                ? "bg-gold-500 text-charcoal-950"
-                : "border border-charcoal-700 bg-charcoal-800/60 text-parchment/60 hover:text-parchment"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+      {/* Main Mode Tabs */}
+      <div className="flex gap-2 border-b border-charcoal-800 pb-3">
+        <button
+          type="button"
+          onClick={() => {
+            setTab("ARTICLES");
+            setActiveArticle(null);
+          }}
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition ${
+            tab === "ARTICLES"
+              ? "bg-gold-500 text-charcoal-950 shadow"
+              : "border border-charcoal-700 bg-charcoal-900/60 text-parchment/70 hover:text-parchment"
+          }`}
+        >
+          <BookOpen className="h-4 w-4" /> Written Guides & Musicianship ({ARTICLES.length})
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setTab("VIDEOS");
+            setActiveArticle(null);
+          }}
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition ${
+            tab === "VIDEOS"
+              ? "bg-gold-500 text-charcoal-950 shadow"
+              : "border border-charcoal-700 bg-charcoal-900/60 text-parchment/70 hover:text-parchment"
+          }`}
+        >
+          <Video className="h-4 w-4" /> Verified Video Masterclasses ({VERIFIED_RESOURCES.length})
+        </button>
       </div>
 
-      {/* Active Article Viewer Modal / Panel */}
-      {activeArticle ? (
-        <div className="rounded-2xl border border-gold-500/40 bg-gradient-to-br from-charcoal-900 to-charcoal-950 p-6 md:p-8">
-          <button
-            type="button"
-            onClick={() => setActiveArticle(null)}
-            className="mb-4 inline-flex items-center gap-1.5 text-xs font-bold text-gold-400 hover:text-gold-300"
-          >
-            &larr; Back to all guides
-          </button>
-
-          <div className="flex items-center gap-2 text-xs text-gold-400">
-            <span className="font-bold uppercase">{activeArticle.category}</span>
-            <span>&middot;</span>
-            <span className="text-parchment/50">{activeArticle.readTime}</span>
-          </div>
-
-          <h2 className="mt-2 text-2xl font-black text-parchment md:text-3xl">{activeArticle.title}</h2>
-          <p className="mt-2 text-sm text-gold-300/80 italic border-l-2 border-gold-500 pl-3 py-0.5">
-            "{activeArticle.summary}"
-          </p>
-
-          <div className="mt-6 space-y-4 text-sm leading-relaxed text-parchment/80">
-            {activeArticle.content.map((paragraph, i) => (
-              <p key={i}>{paragraph}</p>
+      {tab === "ARTICLES" && (
+        <div className="space-y-6">
+          {/* Category Filter Chips */}
+          <div className="flex flex-wrap gap-2">
+            {["ALL", "Musicality", "Live Church", "Ghanaian Heritage", "Beginners"].map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => {
+                  setSelectedCategory(cat);
+                  setActiveArticle(null);
+                }}
+                className={`rounded-lg px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition ${
+                  selectedCategory === cat
+                    ? "bg-gold-500 text-charcoal-950"
+                    : "border border-charcoal-700 bg-charcoal-800/60 text-parchment/60 hover:text-parchment"
+                }`}
+              >
+                {cat}
+              </button>
             ))}
           </div>
 
-          <div className="mt-8 border-t border-charcoal-800 pt-4 flex justify-between items-center">
-            <span className="text-xs text-parchment/40">Abele Drums Coach &middot; Educational Article</span>
-            <button
-              type="button"
-              onClick={() => setActiveArticle(null)}
-              className="rounded-lg bg-charcoal-800 px-4 py-2 text-xs font-semibold text-parchment hover:bg-charcoal-700"
-            >
-              Close Guide
-            </button>
-          </div>
-        </div>
-      ) : (
-        /* Articles Grid */
-        <div className="grid gap-4 sm:grid-cols-2">
-          {filteredArticles.map((article) => (
-            <div
-              key={article.id}
-              onClick={() => setActiveArticle(article)}
-              className="group cursor-pointer rounded-2xl border border-charcoal-800 bg-charcoal-900/60 p-6 transition-all hover:border-gold-500/40 hover:bg-charcoal-900"
-            >
-              <div className="flex items-center justify-between text-xs text-gold-400">
-                <span className="font-bold uppercase">{article.category}</span>
-                <span className="text-parchment/40">{article.readTime}</span>
+          {/* Active Article Viewer */}
+          {activeArticle ? (
+            <div className="rounded-2xl border border-gold-500/40 bg-gradient-to-br from-charcoal-900 to-charcoal-950 p-6 md:p-8 shadow-xl">
+              <button
+                type="button"
+                onClick={() => setActiveArticle(null)}
+                className="mb-4 inline-flex items-center gap-1.5 text-xs font-bold text-gold-400 hover:text-gold-300"
+              >
+                &larr; Back to all guides
+              </button>
+
+              <div className="flex items-center gap-2 text-xs text-gold-400">
+                <span className="font-bold uppercase">{activeArticle.category}</span>
+                <span>&middot;</span>
+                <span className="text-parchment/50">{activeArticle.readTime}</span>
               </div>
-              <h3 className="mt-3 text-lg font-bold text-parchment group-hover:text-gold-300 transition-colors">
-                {article.title}
-              </h3>
-              <p className="mt-2 text-xs text-parchment/60 line-clamp-2 leading-relaxed">
-                {article.summary}
+
+              <h2 className="mt-2 text-2xl font-black text-parchment md:text-3xl">{activeArticle.title}</h2>
+              <p className="mt-2 text-sm text-gold-300/80 italic border-l-2 border-gold-500 pl-3 py-0.5">
+                "{activeArticle.summary}"
               </p>
-              <div className="mt-4 flex items-center gap-1 text-xs font-bold text-gold-400 group-hover:translate-x-1 transition-transform">
-                <span>Read Full Guide</span>
-                <ChevronRight className="h-4 w-4" />
+
+              <div className="mt-6 space-y-4 text-sm leading-relaxed text-parchment/80">
+                {activeArticle.content.map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
+
+              <div className="mt-8 border-t border-charcoal-800 pt-4 flex justify-between items-center">
+                <span className="text-xs text-parchment/40">Abele Drums Coach &middot; Educational Article (100% Offline)</span>
+                <button
+                  type="button"
+                  onClick={() => setActiveArticle(null)}
+                  className="rounded-lg bg-charcoal-800 px-4 py-2 text-xs font-semibold text-parchment hover:bg-charcoal-700"
+                >
+                  Close Guide
+                </button>
               </div>
             </div>
-          ))}
+          ) : (
+            /* Articles Grid */
+            <div className="grid gap-4 sm:grid-cols-2">
+              {filteredArticles.map((article) => (
+                <div
+                  key={article.id}
+                  onClick={() => setActiveArticle(article)}
+                  className="group cursor-pointer rounded-2xl border border-charcoal-800 bg-charcoal-900/60 p-6 transition-all hover:border-gold-500/40 hover:bg-charcoal-900 shadow-md"
+                >
+                  <div className="flex items-center justify-between text-xs text-gold-400">
+                    <span className="font-bold uppercase">{article.category}</span>
+                    <span className="text-parchment/40">{article.readTime}</span>
+                  </div>
+                  <h3 className="mt-3 text-lg font-bold text-parchment group-hover:text-gold-300 transition-colors">
+                    {article.title}
+                  </h3>
+                  <p className="mt-2 text-xs text-parchment/60 line-clamp-2 leading-relaxed">
+                    {article.summary}
+                  </p>
+                  <div className="mt-4 flex items-center gap-1 text-xs font-bold text-gold-400 group-hover:translate-x-1 transition-transform">
+                    <span>Read Full Guide</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "VIDEOS" && (
+        <div className="space-y-6">
+          {/* Transparency / Internet requirement banner */}
+          <div className="flex items-start gap-3 rounded-2xl border border-blue-600/30 bg-blue-950/20 p-4 text-xs text-blue-200">
+            <Wifi className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold text-parchment">External Video Resources</p>
+              <p className="mt-0.5 text-parchment/70">
+                These masterclasses are hosted externally on YouTube by Drumeo and PAS. An active internet connection is required to stream video. All rudiment audio synthesis, metronomes, and written guides in Abele Drums Coach function 100% offline.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {VERIFIED_RESOURCES.map((res: VerifiedResource) => (
+              <div
+                key={res.id}
+                className="flex flex-col justify-between rounded-2xl border border-charcoal-800 bg-charcoal-900/60 p-5 hover:border-gold-500/40 transition-all shadow-md"
+              >
+                <div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="rounded bg-charcoal-800 px-2 py-0.5 text-[10px] font-bold uppercase text-gold-400">
+                      {res.category}
+                    </span>
+                    <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-semibold">
+                      <ShieldCheck className="h-3.5 w-3.5" /> Verified
+                    </span>
+                  </div>
+
+                  <h3 className="mt-3 text-base font-bold text-parchment">{res.title}</h3>
+                  <p className="mt-1.5 text-xs text-parchment/60 leading-relaxed">{res.description}</p>
+                  <p className="mt-2 text-[11px] font-semibold text-parchment/40">Creator: {res.creator}</p>
+                </div>
+
+                <div className="mt-5 border-t border-charcoal-800/80 pt-3">
+                  <a
+                    href={res.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 rounded-xl bg-gold-500 px-4 py-2 text-xs font-bold text-charcoal-950 transition hover:bg-gold-400"
+                  >
+                    Watch on {res.platform} <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

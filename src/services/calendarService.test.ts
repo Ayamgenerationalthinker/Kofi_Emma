@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { buildTodayIcs, buildRecurringPracticeIcs } from "./calendarService";
+import {
+  buildTodayIcs,
+  buildRecurringPracticeIcs,
+  buildCustomScheduleIcs,
+  buildGoogleCalendarUrl,
+} from "./calendarService";
 import type { DailyLesson } from "../lib/types";
 
 const lesson: DailyLesson = {
@@ -70,5 +75,43 @@ describe("calendarService", () => {
   it("respects Africa/Accra having no DST offset (07:00 local stays 07:00Z)", () => {
     const ics = buildTodayIcs({ dateKey: "2026-06-15", timeZone: "Africa/Accra", lesson });
     expect(ics).toContain("DTSTART:20260615T070000Z");
+  });
+
+  it("builds custom weekly schedule with specific BYDAY recurrence and reminder alarm", () => {
+    const ics = buildCustomScheduleIcs({
+      timeZone: "Africa/Accra",
+      time: "06:30",
+      durationMinutes: 45,
+      days: ["MO", "WE", "FR"],
+      reminderMinutesBefore: 15,
+      title: "Morning Drum Shed",
+      focusArea: "PAS Rudiments & Double Bass",
+      targetBpm: 110,
+    });
+
+    expect(ics).toContain("BEGIN:VCALENDAR");
+    expect(ics).toContain("BEGIN:VEVENT");
+    expect(ics).toContain("RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR");
+    expect(ics).toContain("TRIGGER:-PT15M");
+    expect(ics).toContain("SUMMARY:Morning Drum Shed");
+    expect(ics).toContain("PAS Rudiments");
+    expect(ics).toContain("Target Tempo: 110 BPM");
+    expect(ics).toContain("END:VCALENDAR");
+  });
+
+  it("generates a valid Google Calendar URL with encoded parameters and recurrence", () => {
+    const url = buildGoogleCalendarUrl({
+      timeZone: "Africa/Accra",
+      time: "18:00",
+      durationMinutes: 60,
+      days: ["TU", "TH", "SA"],
+      reminderMinutesBefore: 10,
+      title: "Gospel Shed Session",
+      focusArea: "Highlife & Pocket",
+    });
+
+    expect(url.startsWith("https://calendar.google.com/calendar/render?action=TEMPLATE")).toBe(true);
+    expect(url).toContain("text=Gospel%20Shed%20Session");
+    expect(url).toContain("recur=RRULE:FREQ=WEEKLY;BYDAY=TU,TH,SA");
   });
 });
