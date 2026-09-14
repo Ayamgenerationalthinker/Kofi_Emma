@@ -52,7 +52,7 @@ describe("App first-run flow", () => {
     await completeOnboarding(user, "Kwame");
 
     await waitFor(() => expect(screen.getByText(/START SHED/i)).toBeInTheDocument());
-    expect(screen.getByText(/Kwame/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Kwame/).length).toBeGreaterThan(0);
   });
 
   it("persists the profile across a simulated reload (fresh AppProvider mount)", async () => {
