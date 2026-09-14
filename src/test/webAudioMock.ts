@@ -1,5 +1,5 @@
 // A minimal, behavior-faithful Web Audio API stand-in for jsdom (which
-// implements none of it). Used only by Shed Tracks tests — installed with
+// implements none of it). Used by audio tests — installed with
 // `installWebAudioMock()` in a `beforeEach` and torn down with
 // `uninstallWebAudioMock()` in `afterEach` so it never leaks into unrelated
 // test files.
@@ -7,6 +7,9 @@
 export interface MockAudioParam {
   value: number;
   setValueAtTime(value: number, time: number): MockAudioParam;
+  exponentialRampToValueAtTime(value: number, time: number): MockAudioParam;
+  linearRampToValueAtTime(value: number, time: number): MockAudioParam;
+  setValueCurveAtTime(values: Float32Array, startTime: number, duration: number): MockAudioParam;
 }
 
 function createParam(initial: number): MockAudioParam {
@@ -16,12 +19,41 @@ function createParam(initial: number): MockAudioParam {
       param.value = value;
       return param;
     },
+    exponentialRampToValueAtTime(value) {
+      param.value = value;
+      return param;
+    },
+    linearRampToValueAtTime(value) {
+      param.value = value;
+      return param;
+    },
+    setValueCurveAtTime(_values) {
+      return param;
+    },
   };
   return param;
 }
 
 export class MockGainNode {
   gain = createParam(1);
+  connect(): void {}
+  disconnect(): void {}
+}
+
+export class MockOscillatorNode {
+  type = "sine";
+  frequency = createParam(440);
+  connect(): void {}
+  disconnect(): void {}
+  start(): void {}
+  stop(): void {}
+}
+
+export class MockBiquadFilterNode {
+  type = "lowpass";
+  frequency = createParam(1000);
+  Q = createParam(1);
+  gain = createParam(0);
   connect(): void {}
   disconnect(): void {}
 }
@@ -77,6 +109,14 @@ export class MockAudioContext {
 
   createGain(): MockGainNode {
     return new MockGainNode();
+  }
+
+  createOscillator(): MockOscillatorNode {
+    return new MockOscillatorNode();
+  }
+
+  createBiquadFilter(): MockBiquadFilterNode {
+    return new MockBiquadFilterNode();
   }
 
   createBufferSource(): MockBufferSourceNode {

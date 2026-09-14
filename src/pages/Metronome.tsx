@@ -7,7 +7,8 @@ import { BeatIndicator } from "../components/BeatIndicator";
 import { getMetronomePreferences, updateMetronomePreferences } from "../services/settingsService";
 
 const TIME_SIGNATURES: { value: TimeSignature; description: string }[] = [
-  { value: "4/4", description: "Fast Praise / Highlife" },
+  { value: "4/4", description: "Fast Praise / Highlife / Gospel" },
+  { value: "3/4", description: "Worship Waltz / Ballad" },
   { value: "6/8", description: "West African Compound Feel" },
   { value: "12/8", description: "Traditional Compound Gospel Feel" },
   { value: "7/8", description: "Advanced Odd Meter" },

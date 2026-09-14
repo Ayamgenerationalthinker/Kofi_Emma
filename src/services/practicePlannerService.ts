@@ -85,7 +85,7 @@ export function generateTodayLesson(timezone: string): DailyLesson {
   const independenceExercise = findAccessibleExerciseByCategories(["INDEPENDENCE"], currentExercise.id) ?? currentExercise;
   const part2: LessonPart = {
     part: 2,
-    title: "Kofi Emma Independence Matrix",
+    title: "Gospel Independence Matrix (Kofi Emma-inspired)",
     duration: 15,
     exerciseId: independenceExercise.id,
     exerciseName: independenceExercise.name,

@@ -20,7 +20,10 @@ export const SKILL_CATEGORIES: SkillCategory[] = ["Timing", "Independence", "Gro
 
 const CATEGORY_TO_SKILLS: Record<string, SkillCategory[]> = {
   TECHNIQUE: ["Timing", "Chops"],
+  TIMING: ["Timing"],
   INDEPENDENCE: ["Independence"],
+  GROOVE: ["Groove", "Timing"],
+  FILLS: ["Chops", "Timing"],
   HIGH_LIFE: ["Groove"],
   PRAISE: ["Groove", "Speed"],
   WORSHIP: ["Groove"],

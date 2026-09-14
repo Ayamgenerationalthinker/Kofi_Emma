@@ -16,6 +16,9 @@ describe("getMeterDefinition — measure length per meter (section 99)", () => {
   it("4/4 has 4 beats per measure", () => {
     expect(getMeterDefinition("4/4").totalSteps).toBe(4);
   });
+  it("3/4 has 3 beats per measure", () => {
+    expect(getMeterDefinition("3/4").totalSteps).toBe(3);
+  });
   it("6/8 has 6 eighth-note positions", () => {
     expect(getMeterDefinition("6/8").totalSteps).toBe(6);
   });

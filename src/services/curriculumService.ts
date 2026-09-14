@@ -131,6 +131,7 @@ export interface CurriculumStateDto {
     totalExercises: number;
     masteredExercises: number;
   }>;
+  totalExercises: number;
   overallProgress: number;
 }
 
@@ -172,6 +173,7 @@ export function getCurriculumState(): CurriculumStateDto {
     currentPhaseNumber,
     currentExerciseId: next?.exercise.id ?? null,
     phases: phaseDtos,
+    totalExercises,
     overallProgress: totalExercises === 0 ? 0 : Math.round((totalMastered / totalExercises) * 100),
   };
 }

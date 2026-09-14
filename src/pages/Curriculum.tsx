@@ -96,8 +96,8 @@ function CurriculumLevelList() {
                     <Lock className="h-5 w-5 text-parchment/40" aria-hidden="true" />
                   )}
                   <div>
-                    <p className="font-bold">
-                      Level {phase.number}: {phase.title}
+                    <p className="font-bold text-parchment">
+                      {phase.title}
                     </p>
                     <p className="text-sm text-parchment/60">{phase.subtitle}</p>
                   </div>

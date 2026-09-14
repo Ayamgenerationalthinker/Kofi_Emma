@@ -1,9 +1,9 @@
 {
   "name": "abele-drums-coach",
   "private": true,
-  "version": "3.0.0",
+  "version": "4.1.0",
   "type": "module",
-  "description": "Abele Drums Coach. A client-side-first, local-first PWA — a premium Ghanaian gospel drum coaching system. No custom backend server; persistence is LocalStorage by default, with optional Supabase cloud sync for accounts.",
+  "description": "Abele Drums Coach V4.1. A client-side-first, local-first PWA — a premium Ghanaian gospel drum coaching system. Includes 40 PAS rudiments, Web Audio synthesis engine, double bass pedal school, RFC 5545 calendar integration, and 80 curriculum exercises.",
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "dev": "vite",
@@ -11,9 +11,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "eslint src",
     "format": "prettier --write .",
-    "curriculum:validate": "tsx scripts/curriculum-validate.ts"
+    "curriculum:validate": "tsx scripts/curriculum-validate.ts",
+    "content:validate": "tsx scripts/content-validate.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

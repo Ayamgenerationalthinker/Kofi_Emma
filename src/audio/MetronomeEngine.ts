@@ -116,6 +116,10 @@ export class MetronomeEngine {
     this.stepSeconds = stepSecondsFor(clampBpm(bpm), subdivision);
   }
 
+  setBpm(bpm: number, subdivision = "quarter"): void {
+    this.setTempo(bpm, subdivision);
+  }
+
   stop(): void {
     this.stopScheduling();
     this._status = "STOPPED";

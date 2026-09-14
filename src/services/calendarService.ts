@@ -1,7 +1,19 @@
 import type { DailyLesson } from "../lib/types";
 
-// Hand-built RFC 5545 iCalendar output. No external calendar API is
-// required — the file is generated in the browser and downloaded directly.
+// RFC 5545 iCalendar standard implementation and Google Calendar URL builder.
+// No external calendar API/OAuth is required. Events are generated in the browser
+// and downloaded directly as .ics or opened in Google Calendar.
+
+export interface PracticeScheduleOptions {
+  timeZone: string;
+  time: string; // "HH:MM" e.g. "18:00"
+  durationMinutes: number; // e.g. 30, 45, 60
+  days: ("MO" | "TU" | "WE" | "TH" | "FR" | "SA" | "SU")[];
+  reminderMinutesBefore: number; // 0, 5, 10, 15, 30, 60
+  title?: string;
+  focusArea?: string;
+  targetBpm?: number;
+}
 
 function zonedTimeToUtc(dateKey: string, time: string, timeZone: string): Date {
   const naiveUtc = new Date(`${dateKey}T${time}:00.000Z`);
@@ -12,6 +24,10 @@ function zonedTimeToUtc(dateKey: string, time: string, timeZone: string): Date {
 }
 
 function formatIcsUtc(date: Date): string {
+  return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+}
+
+function formatCompactUtc(date: Date): string {
   return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 }
 
@@ -38,9 +54,12 @@ function buildEvent(params: {
   summary: string;
   description: string;
   rrule?: string;
+  reminderMinutes?: number;
 }): string {
   const now = formatIcsUtc(new Date());
   const end = new Date(params.start.getTime() + params.durationMinutes * 60000);
+  const reminderMinutes = params.reminderMinutes ?? 10;
+
   const lines = [
     "BEGIN:VEVENT",
     `UID:${params.uidSeed}@abeledrumscoach.local`,
@@ -53,7 +72,7 @@ function buildEvent(params: {
     "BEGIN:VALARM",
     "ACTION:DISPLAY",
     `DESCRIPTION:${escapeIcsText(params.summary)}`,
-    "TRIGGER:-PT0M",
+    `TRIGGER:-PT${reminderMinutes}M`,
     "END:VALARM",
     "END:VEVENT",
   ];
@@ -84,7 +103,7 @@ export function buildTodayIcs(params: { dateKey: string; timeZone: string; lesso
   const partsSummary = lesson.lessonParts
     .map((p) => `Part ${p.part} (${p.duration} min): ${p.title} — ${p.exerciseName} @ ${p.targetBpm} BPM`)
     .join("\n");
-  const description = `Level: ${lesson.phaseTitle}\nTotal duration: ${lesson.totalMinutes} minutes\n\n${partsSummary}`;
+  const description = `Level: ${lesson.phaseTitle}\nTotal duration: ${lesson.totalMinutes} minutes\n\n${partsSummary}\n\nOpen Abele Drums Coach to begin.`;
 
   const event = buildEvent({
     uidSeed: `today-${dateKey}-${randomSeed()}`,
@@ -92,9 +111,66 @@ export function buildTodayIcs(params: { dateKey: string; timeZone: string; lesso
     durationMinutes: lesson.totalMinutes,
     summary: "Abele Drums Coach — Today's Shed",
     description,
+    reminderMinutes: 10,
   });
 
   return wrapCalendar([event]);
+}
+
+/** Builds an RFC 5545 valid recurring schedule iCalendar string with weekly byday recurrence and alarm */
+export function buildCustomScheduleIcs(options: PracticeScheduleOptions): string {
+  const today = new Date();
+  const dateKey = today.toISOString().split("T")[0];
+  const start = zonedTimeToUtc(dateKey, options.time, options.timeZone);
+
+  const byDayRule = options.days.length > 0 ? `RRULE:FREQ=WEEKLY;BYDAY=${options.days.join(",")}` : "RRULE:FREQ=DAILY";
+  const workoutPlan = [
+    "ABELE DRUMS COACH — Practice Workout",
+    `Focus: ${options.focusArea ?? "Rudiments & Gospel Foundations"}`,
+    `Duration: ${options.durationMinutes} minutes`,
+    options.targetBpm ? `Target Tempo: ${options.targetBpm} BPM` : "",
+    "",
+    "Workout Breakdown:",
+    "• Warm-up & Hand Technique: 5 min",
+    "• Timing & Subdivision Control: 5 min",
+    `• Core Exercise Practice: ${Math.max(5, options.durationMinutes - 15)} min`,
+    "• Clean Tempo Push / Challenge: 5 min",
+    "",
+    "Open Abele Drums Coach to track your clean BPM and streak.",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const event = buildEvent({
+    uidSeed: `schedule-${randomSeed()}`,
+    start,
+    durationMinutes: options.durationMinutes,
+    summary: options.title ?? "Abele Drums Coach — Practice Shed",
+    description: workoutPlan,
+    rrule: byDayRule,
+    reminderMinutes: options.reminderMinutesBefore,
+  });
+
+  return wrapCalendar([event]);
+}
+
+/** Generates a pre-filled Google Calendar web URL that opens directly in the user's browser */
+export function buildGoogleCalendarUrl(options: PracticeScheduleOptions): string {
+  const today = new Date();
+  const dateKey = today.toISOString().split("T")[0];
+  const start = zonedTimeToUtc(dateKey, options.time, options.timeZone);
+  const end = new Date(start.getTime() + options.durationMinutes * 60000);
+
+  const startStr = formatCompactUtc(start);
+  const endStr = formatCompactUtc(end);
+
+  const title = encodeURIComponent(options.title ?? "Abele Drums Coach — Practice Shed");
+  const details = encodeURIComponent(
+    `Abele Drums Coach Practice Workout\nDuration: ${options.durationMinutes} minutes\nFocus: ${options.focusArea ?? "Gospel & Rudiments"}\nOpen Abele Drums Coach to begin.`
+  );
+  const recurParam = options.days.length > 0 ? `&recur=RRULE:FREQ=WEEKLY;BYDAY=${options.days.join(",")}` : "&recur=RRULE:FREQ=DAILY";
+
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startStr}/${endStr}&details=${details}${recurParam}`;
 }
 
 export function buildRecurringPracticeIcs(params: {
@@ -113,10 +189,11 @@ export function buildRecurringPracticeIcs(params: {
       buildEvent({
         uidSeed: "recurring-morning",
         start: zonedTimeToUtc(startDateKey, morningTime, timeZone),
-        durationMinutes: 55,
+        durationMinutes: 45,
         summary: "Abele Drums Coach — Morning Shed",
-        description: "Your 55-minute drum session is ready. Clean first. Fast later.",
+        description: "Your 45-minute drum session is ready. Clean first. Fast later.",
         rrule: "RRULE:FREQ=DAILY",
+        reminderMinutes: 10,
       })
     );
   }
@@ -126,10 +203,11 @@ export function buildRecurringPracticeIcs(params: {
       buildEvent({
         uidSeed: "recurring-evening",
         start: zonedTimeToUtc(startDateKey, eveningTime, timeZone),
-        durationMinutes: 55,
+        durationMinutes: 45,
         summary: "Abele Drums Coach — Evening Shed",
-        description: "Keep your consistency. Today's session is waiting.",
+        description: "Keep your consistency. Today's practice session is waiting.",
         rrule: "RRULE:FREQ=DAILY",
+        reminderMinutes: 10,
       })
     );
   }

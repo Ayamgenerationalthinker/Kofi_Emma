@@ -1,9 +1,7 @@
-// Pure, framework/audio-free meter math (section 98: testable without
-// AudioContext). This is what makes the metronome's time-signature support
-// more than a cosmetic label — it drives beat grouping, accent placement,
-// measure length, and the visualizer.
+// Pure, framework/audio-free meter math.
+// Drives beat grouping, accent placement, measure length, and the visualizer.
 
-export type TimeSignature = "4/4" | "6/8" | "12/8" | "7/8";
+export type TimeSignature = "4/4" | "3/4" | "6/8" | "12/8" | "7/8";
 export type Subdivision = "quarter" | "eighth" | "16th" | "triplet";
 export type AccentType = "PRIMARY" | "SECONDARY" | "SOFT";
 
@@ -16,13 +14,11 @@ export interface MeterDefinition {
   timeSignature: TimeSignature;
   grouping: number[];
   totalSteps: number;
-  /** "quarter-grid" for 4/4 (subdivision-selectable); "eighth" for compound/odd meters (fixed eighth-note pulse). */
+  /** "quarter-grid" for 4/4 and 3/4 (subdivision-selectable); "eighth" for compound/odd meters (fixed eighth-note pulse). */
   unitNoteValue: "quarter-grid" | "eighth";
 }
 
-// Section 36-38: the meter's default grouping, plus the alternate groupings
-// 7/8 explicitly supports.
-export const COMPOUND_GROUPING_OPTIONS: Record<Exclude<TimeSignature, "4/4">, number[][]> = {
+export const COMPOUND_GROUPING_OPTIONS: Record<Exclude<TimeSignature, "4/4" | "3/4">, number[][]> = {
   "6/8": [[3, 3]],
   "12/8": [[3, 3, 3, 3]],
   "7/8": [
@@ -32,7 +28,7 @@ export const COMPOUND_GROUPING_OPTIONS: Record<Exclude<TimeSignature, "4/4">, nu
   ],
 };
 
-const METER_TOTAL_UNITS: Record<TimeSignature, number> = { "4/4": 4, "6/8": 6, "12/8": 12, "7/8": 7 };
+const METER_TOTAL_UNITS: Record<TimeSignature, number> = { "4/4": 4, "3/4": 3, "6/8": 6, "12/8": 12, "7/8": 7 };
 
 export function stepsPerBeat(subdivision: Subdivision): number {
   switch (subdivision) {
@@ -48,10 +44,13 @@ export function stepsPerBeat(subdivision: Subdivision): number {
   }
 }
 
-/** Builds a MeterDefinition. An invalid/mismatched `grouping` (wrong total) silently falls back to the meter's default. */
+/** Builds a MeterDefinition. */
 export function getMeterDefinition(timeSignature: TimeSignature, grouping?: number[]): MeterDefinition {
   if (timeSignature === "4/4") {
     return { timeSignature, grouping: [4], totalSteps: 4, unitNoteValue: "quarter-grid" };
+  }
+  if (timeSignature === "3/4") {
+    return { timeSignature, grouping: [3], totalSteps: 3, unitNoteValue: "quarter-grid" };
   }
   const options = COMPOUND_GROUPING_OPTIONS[timeSignature];
   const total = METER_TOTAL_UNITS[timeSignature];
@@ -73,14 +72,17 @@ export function groupStartPositions(grouping: number[]): number[] {
 
 /**
  * The full measure as a sequence of accent-typed positions.
- * - 4/4: position 0 is PRIMARY, every other subdivision step is SOFT — no
- *   secondary tier (section 35).
- * - 6/8, 12/8, 7/8: position 0 is PRIMARY, every other group's start
- *   position is SECONDARY, everything else is SOFT (sections 36-38).
  */
 export function getMeasureStructure(meter: MeterDefinition, subdivision: Subdivision): MeterEvent[] {
   if (meter.timeSignature === "4/4") {
     const totalSteps = 4 * stepsPerBeat(subdivision);
+    return Array.from({ length: totalSteps }, (_, i) => ({
+      position: i,
+      accentType: i === 0 ? "PRIMARY" : "SOFT",
+    }));
+  }
+  if (meter.timeSignature === "3/4") {
+    const totalSteps = 3 * stepsPerBeat(subdivision);
     return Array.from({ length: totalSteps }, (_, i) => ({
       position: i,
       accentType: i === 0 ? "PRIMARY" : "SOFT",
@@ -93,14 +95,14 @@ export function getMeasureStructure(meter: MeterDefinition, subdivision: Subdivi
   }));
 }
 
-/** Seconds per meter "unit" (quarter note for 4/4, eighth note for compound/odd meters) at a given BPM. */
+/** Seconds per meter "unit" at a given BPM. */
 export function getBeatDuration(bpm: number): number {
   return 60 / bpm;
 }
 
-/** Seconds per scheduled audio step at a given BPM — for 4/4 this divides the beat by the chosen subdivision; compound/odd meters use a fixed eighth-note grid. */
+/** Seconds per scheduled audio step at a given BPM. */
 export function getSubdivisionDuration(bpm: number, meter: MeterDefinition, subdivision: Subdivision): number {
-  if (meter.timeSignature !== "4/4") return getBeatDuration(bpm);
+  if (meter.timeSignature !== "4/4" && meter.timeSignature !== "3/4") return getBeatDuration(bpm);
   return getBeatDuration(bpm) / stepsPerBeat(subdivision);
 }
 
@@ -115,15 +117,15 @@ export function getNextEvent(currentPosition: number, meter: MeterDefinition, su
   return structure[nextPos];
 }
 
-/** "3+3", "2+2+3", or "4" for 4/4 — used in the meter picker UI. */
 export function formatGroupingLabel(meter: MeterDefinition): string {
-  return meter.timeSignature === "4/4" ? "4" : meter.grouping.join("+");
+  return meter.timeSignature === "4/4" ? "4" : meter.timeSignature === "3/4" ? "3" : meter.grouping.join("+");
 }
 
-/** e.g. "1 2 | 3 4 | 5 6 7" for 7/8 grouped 2+2+3 — the visualizer count label (section 39/77). */
 export function formatCountLabel(meter: MeterDefinition, subdivision: Subdivision): string {
   const structure = getMeasureStructure(meter, subdivision);
-  const groupStarts = new Set(meter.timeSignature === "4/4" ? [] : groupStartPositions(meter.grouping));
+  const groupStarts = new Set(
+    meter.timeSignature === "4/4" || meter.timeSignature === "3/4" ? [] : groupStartPositions(meter.grouping)
+  );
   const parts: string[] = [];
   let current: string[] = [];
   for (let i = 0; i < structure.length; i++) {

@@ -17,6 +17,16 @@ import { Shed } from "./pages/Shed";
 import { ShedTracks } from "./pages/ShedTracks";
 import { ShedTrackDetail } from "./pages/ShedTrackDetail";
 import { Achievements } from "./pages/Achievements";
+import { TempoBuilder } from "./pages/TempoBuilder";
+import { FillTrainer } from "./pages/FillTrainer";
+import { TransitionTrainer } from "./pages/TransitionTrainer";
+import { LiveChurch } from "./pages/LiveChurch";
+import { CallAndResponse } from "./pages/CallAndResponse";
+import { Library } from "./pages/Library";
+import { MicCoach } from "./pages/MicCoach";
+import { RudimentsSchool } from "./pages/RudimentsSchool";
+import { RudimentDetail } from "./pages/RudimentDetail";
+import { DoubleBassSchool } from "./pages/DoubleBassSchool";
 import { NotFound } from "./pages/NotFound";
 import { useNotificationScheduler } from "./hooks/useNotificationScheduler";
 import { ensureProgressInitialized } from "./services/curriculumService";
@@ -83,6 +93,9 @@ export default function App() {
           <Route path="/practice" element={<Practice />} />
           <Route path="/curriculum" element={<Curriculum />} />
           <Route path="/curriculum/:exerciseId" element={<ExerciseDetail />} />
+          <Route path="/rudiments" element={<RudimentsSchool />} />
+          <Route path="/rudiments/:rudimentId" element={<RudimentDetail />} />
+          <Route path="/double-bass" element={<DoubleBassSchool />} />
           <Route path="/handbook" element={<Navigate to="/curriculum" replace />} />
           <Route path="/shed" element={<Shed />} />
           <Route path="/shed-tracks" element={<ShedTracks />} />
@@ -92,6 +105,13 @@ export default function App() {
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/tempo-builder" element={<TempoBuilder />} />
+          <Route path="/fills" element={<FillTrainer />} />
+          <Route path="/transitions" element={<TransitionTrainer />} />
+          <Route path="/live-church" element={<LiveChurch />} />
+          <Route path="/call-and-response" element={<CallAndResponse />} />
+          <Route path="/library" element={<Library />} />
+          <Route path="/mic-coach" element={<MicCoach />} />
           <Route path="/onboarding" element={<Navigate to="/" replace />} />
           <Route path="*" element={<NotFound />} />
         </Route>

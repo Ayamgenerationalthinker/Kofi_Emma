@@ -18,7 +18,7 @@ describe("Curriculum page", () => {
     );
 
     expect(screen.getByText(/Master all Level 0 prerequisites/)).toBeInTheDocument();
-    expect(screen.getAllByText(/Intermediate/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Level 1 — Rhythm Foundation/).length).toBeGreaterThan(0);
   });
 
   it("shows the first level-0 exercise as available once expanded", async () => {
@@ -29,8 +29,8 @@ describe("Curriculum page", () => {
       </MemoryRouter>
     );
 
-    await user.click(screen.getByText(/Level 0:/).closest("button")!);
-    expect(await screen.findByText("Single Stroke Control")).toBeInTheDocument();
+    await user.click(screen.getByText(/Level 0 — Absolute Beginner/).closest("button")!);
+    expect(await screen.findByText("Meet the Drum Kit")).toBeInTheDocument();
     expect(screen.getByText("Available")).toBeInTheDocument();
   });
 });

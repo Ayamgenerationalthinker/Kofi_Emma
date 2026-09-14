@@ -36,7 +36,7 @@ describe("Dashboard page", () => {
     renderDashboard();
     await waitFor(() => expect(screen.getByText(/START SHED/i)).toBeInTheDocument());
     expect(screen.getAllByText(/Absolute Beginner/).length).toBeGreaterThan(0);
-    expect(screen.getByText("Single Stroke Control")).toBeInTheDocument(); // today's shed headline exercise
+    expect(screen.getByText("Meet the Drum Kit")).toBeInTheDocument(); // today's shed headline exercise
   });
 
   it("shows a locked icon for locked levels", () => {

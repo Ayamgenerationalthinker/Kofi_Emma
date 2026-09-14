@@ -1,41 +1,61 @@
+import { useState, useEffect } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, ListMusic, BookOpen, Timer, LineChart, CalendarDays, Settings as SettingsIcon, Flame, AlertTriangle, Award } from "lucide-react";
+import {
+  LayoutDashboard,
+  ListMusic,
+  BookOpen,
+  Timer,
+  LineChart,
+  CalendarDays,
+  Settings as SettingsIcon,
+  Flame,
+  AlertTriangle,
+  Church,
+  BookOpenCheck,
+  Drum,
+  Footprints,
+  WifiOff,
+} from "lucide-react";
 import { useAppContext } from "../context/AppContext";
 import { useImmersive } from "../context/ImmersiveContext";
 import { useLocalDbVersion } from "../hooks/useLocalDb";
 import { getCurriculumState } from "../services/curriculumService";
 import { BottomNav } from "./navigation/BottomNav";
+import { PWAInstallBanner } from "./PWAInstallBanner";
 
 const DESKTOP_NAV_ITEMS = [
   { to: "/", label: "Home", icon: LayoutDashboard },
   { to: "/practice", label: "Practice", icon: ListMusic },
-  { to: "/curriculum", label: "Learn", icon: BookOpen },
-  { to: "/shed", label: "Shed", icon: Flame },
-  { to: "/progress", label: "Progress", icon: LineChart },
-  { to: "/achievements", label: "Achievements", icon: Award },
+  { to: "/curriculum", label: "Curriculum", icon: BookOpen },
+  { to: "/rudiments", label: "40 Rudiments", icon: Drum },
+  { to: "/double-bass", label: "Double Bass", icon: Footprints },
+  { to: "/live-church", label: "Live Church", icon: Church },
+  { to: "/shed", label: "Shed Lab", icon: Flame },
   { to: "/metronome", label: "Metronome", icon: Timer },
+  { to: "/progress", label: "Progress", icon: LineChart },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
+  { to: "/library", label: "Library", icon: BookOpenCheck },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
-// Section 71: a compact mobile header (name + current level, no wasted
-// vertical space) plus a fixed bottom nav on mobile. A desktop-width top
-// nav row is kept for larger screens where a thumb-reach bottom bar makes
-// less sense (section 7: mobile drives the design, desktop is secondary —
-// not absent).
 export function Layout() {
   const { storageAvailable } = useAppContext();
   const { immersive } = useImmersive();
   useLocalDbVersion();
   const state = getCurriculumState();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  // The immersive toggle must only ever change styling, never the shape of
-  // the tree around <Outlet />: an earlier version returned two structurally
-  // different trees (one with header/nav, one without), which made React
-  // unmount and remount the routed page — including all of its local state
-  // (e.g. Practice.tsx's in-progress session stage) — the instant a lesson
-  // part started and immersive flipped to true. Header/bottom-nav are now
-  // just hidden, and <main>/<Outlet /> always sit in the same position.
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-charcoal-950 text-parchment">
       <a
@@ -58,15 +78,23 @@ export function Layout() {
               Level {state.currentPhaseNumber}
             </span>
           </div>
-          {!storageAvailable && (
-            <span className="flex items-center gap-1.5 rounded-full border border-amber-600/50 bg-amber-950/40 px-2.5 py-1 text-[11px] text-amber-300">
-              <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">Storage blocked — progress won't be saved</span>
-              <span className="sm:hidden">Storage blocked</span>
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {!isOnline && (
+              <span className="flex items-center gap-1.5 rounded-full border border-blue-600/50 bg-blue-950/40 px-2.5 py-1 text-[11px] text-blue-300">
+                <WifiOff className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Offline Mode (Local)</span>
+              </span>
+            )}
+            {!storageAvailable && (
+              <span className="flex items-center gap-1.5 rounded-full border border-amber-600/50 bg-amber-950/40 px-2.5 py-1 text-[11px] text-amber-300">
+                <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="hidden sm:inline">Storage blocked — progress won't be saved</span>
+                <span className="sm:hidden">Storage blocked</span>
+              </span>
+            )}
+          </div>
         </div>
-        <nav aria-label="Primary" className="hidden border-t border-charcoal-800 md:block">
+        <nav aria-label="Primary" className="hidden border-t border-charcoal-800 md:block overflow-x-auto">
           <div className="mx-auto flex max-w-6xl gap-1 px-4">
             {DESKTOP_NAV_ITEMS.map(({ to, label, icon: Icon }) => (
               <NavLink
@@ -75,7 +103,7 @@ export function Layout() {
                 end={to === "/"}
                 className={({ isActive }) =>
                   [
-                    "flex items-center gap-2 border-b-2 px-3 py-3 text-sm font-medium transition-colors",
+                    "flex shrink-0 items-center gap-2 border-b-2 px-3 py-3 text-sm font-medium transition-colors",
                     isActive ? "border-gold-500 text-gold-300" : "border-transparent text-parchment/60 hover:text-parchment",
                   ].join(" ")
                 }
@@ -95,6 +123,8 @@ export function Layout() {
       >
         <Outlet />
       </main>
+
+      <PWAInstallBanner />
 
       <div className="md:hidden" hidden={immersive}>
         <BottomNav />
