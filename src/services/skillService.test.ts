@@ -16,19 +16,15 @@ describe("skillService", () => {
   });
 
   it("never reports a fabricated percentage for a skill with no real attempts", () => {
-    // Master P1-E01 (a TECHNIQUE exercise) without ever recording an
-    // attempt against it — masterExercise() alone (used by other tests as
-    // a shortcut) doesn't touch attemptsCount, so this checks the "hasData"
-    // gate is really about attempts, not status.
-    masterExercise("P1-E01");
+    masterExercise("S1-E01");
     const groove = getSkillProgress().find((p) => p.skill === "Groove")!;
     expect(groove.hasData).toBe(false);
   });
 
   it("gains real data for a skill once an exercise developing it has been attempted", () => {
     mutate((db) => {
-      db.progress["P1-E01"].attemptsCount = 1;
-      db.progress["P1-E01"].status = "MASTERED";
+      db.progress["S1-E01"].attemptsCount = 1;
+      db.progress["S1-E01"].status = "MASTERED";
     });
     const progress = getSkillProgress();
     const timing = progress.find((p) => p.skill === "Timing")!;
@@ -40,8 +36,8 @@ describe("skillService", () => {
 
   it("identifies the weakest and strongest skill only among skills with real data", () => {
     mutate((db) => {
-      db.progress["P1-E01"].attemptsCount = 1;
-      db.progress["P1-E01"].status = "MASTERED"; // Timing + Chops: 100%-of-relevant-exercises-mastered territory
+      db.progress["S1-E01"].attemptsCount = 1;
+      db.progress["S1-E01"].status = "MASTERED";
     });
     const progress = getSkillProgress();
     const weakest = getWeakestSkill(progress);

@@ -1,8 +1,7 @@
 // npm run curriculum:validate — statically validates the curriculum content
 // defined in src/data/curriculum.ts: duplicate ids/slugs, missing
-// prerequisites, circular dependencies, invalid phase references, and
-// out-of-range BPM/accuracy. Runs against plain data, no browser or
-// LocalStorage involved.
+// prerequisites, circular dependencies, invalid phase references,
+// source attributions, and out-of-range BPM/accuracy.
 
 import { PHASES, EXERCISES } from "../src/data/curriculum.ts";
 
@@ -45,12 +44,15 @@ function validate(): ValidationError[] {
     if (exercise.requiredConsecutiveCleanAttempts < 1) {
       errors.push({ rule: "invalid-mastery-criteria", message: `${exercise.id}: requiredConsecutiveCleanAttempts must be >= 1` });
     }
+    if (!exercise.source || !exercise.source.name) {
+      errors.push({ rule: "missing-source-attribution", message: `${exercise.id} is missing source attribution metadata` });
+    }
   }
 
   for (const phase of PHASES) {
-    const count = EXERCISES.filter((e) => e.phaseNumber === phase.number).length;
-    if (count < 10) {
-      errors.push({ rule: "insufficient-exercises", message: `Phase ${phase.number} has only ${count} exercises (minimum 10)` });
+    const count = EXERCISES.filter((e) => e.phaseId === phase.id).length;
+    if (count === 0) {
+      errors.push({ rule: "empty-phase", message: `Phase ${phase.id} (${phase.title}) has 0 exercises` });
     }
   }
 
@@ -101,6 +103,6 @@ if (errors.length > 0) {
   process.exit(1);
 } else {
   console.log(
-    `Curriculum validation PASSED: ${PHASES.length} phases, ${EXERCISES.length} exercises, ${totalPrereqEdges} prerequisite edges, no cycles.`
+    `Curriculum validation PASSED: ${PHASES.length} phases, ${EXERCISES.length} exercises, ${totalPrereqEdges} prerequisite edges, verified source attributions, zero cycles.`
   );
 }

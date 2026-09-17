@@ -4,7 +4,7 @@ import { ensureProgressInitialized, masterExercise } from "./curriculumService";
 import { mutate, newId } from "../lib/localDb";
 
 const TZ = "Africa/Accra";
-const PHASE_1_EXERCISE_IDS = ["P1-E01", "P1-E02", "P1-E03", "P1-E04", "P1-E05", "P1-E06", "P1-E07", "P1-E08", "P1-E09", "P1-E10"];
+const STAGE_0_EXERCISE_IDS = ["S0-E01", "S0-E02", "S0-E03", "S0-E04", "S0-E05"];
 
 function addCompletedSession(dateKey: string): void {
   mutate((db) => {
@@ -40,11 +40,9 @@ describe("achievementService", () => {
 
   it("unlocks first_groove and clean-bpm achievements only once real mastery/bpm exists", () => {
     expect(checkAndUnlockAchievements(TZ)).not.toContain("first_groove");
-    masterExercise("P1-E01");
-    // masterExercise() alone doesn't set cleanBpm — simulate what
-    // recordAttempt() would have already written for a real mastery.
+    masterExercise("S0-E01");
     mutate((db) => {
-      db.progress["P1-E01"].cleanBpm = 65;
+      db.progress["S0-E01"].cleanBpm = 65;
     });
     const unlocked = checkAndUnlockAchievements(TZ);
     expect(unlocked).toContain("first_groove");
@@ -53,11 +51,11 @@ describe("achievementService", () => {
     expect(unlocked).not.toContain("clean_bpm_80");
   });
 
-  it("unlocks level_0_complete only once every phase-1 exercise is mastered", () => {
-    for (const id of PHASE_1_EXERCISE_IDS.slice(0, -1)) masterExercise(id);
+  it("unlocks level_0_complete only once every stage-0 exercise is mastered", () => {
+    for (const id of STAGE_0_EXERCISE_IDS.slice(0, -1)) masterExercise(id);
     expect(checkAndUnlockAchievements(TZ)).not.toContain("level_0_complete");
 
-    masterExercise(PHASE_1_EXERCISE_IDS[PHASE_1_EXERCISE_IDS.length - 1]);
+    masterExercise(STAGE_0_EXERCISE_IDS[STAGE_0_EXERCISE_IDS.length - 1]);
     expect(checkAndUnlockAchievements(TZ)).toContain("level_0_complete");
   });
 

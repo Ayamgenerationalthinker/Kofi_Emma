@@ -36,10 +36,10 @@ describe("Progress page", () => {
   });
 
   it("shows real skill progress and an achievements summary once there is practice data", () => {
-    masterExercise("P1-E01");
+    masterExercise("S0-E01");
     mutate((db) => {
-      db.progress["P1-E01"].attemptsCount = 1;
-      db.progress["P1-E01"].cleanBpm = 65;
+      db.progress["S0-E01"].attemptsCount = 1;
+      db.progress["S0-E01"].cleanBpm = 65;
       db.sessions.push({
         id: newId(),
         date: "2026-01-01",
@@ -56,8 +56,6 @@ describe("Progress page", () => {
     expect(screen.getByText("Skills")).toBeInTheDocument();
     expect(screen.getAllByText("Timing").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Independence").length).toBeGreaterThan(0);
-    // Independence has no real attempts yet — must show the honest
-    // placeholder, never a fabricated 0%.
     expect(screen.getAllByText(/Keep practicing to build this skill/i).length).toBeGreaterThan(0);
 
     expect(screen.getByText(/Achievements unlocked/i)).toBeInTheDocument();

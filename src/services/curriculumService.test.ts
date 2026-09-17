@@ -8,51 +8,47 @@ import {
 } from "./curriculumService";
 import { getDb } from "../lib/localDb";
 
-// These tests exercise the real, full 40-exercise curriculum (no test
-// fixture) — this is the same content the shipped app uses, so the tests
-// double as a check that the curriculum's own prerequisite graph behaves
-// as intended.
 describe("curriculumService locking", () => {
   beforeEach(() => {
     ensureProgressInitialized();
   });
 
-  it("starts with only the prerequisite-free exercise in phase 1 unlocked", () => {
-    expect(canAccessExercise("P1-E01")).toBe(true);
-    expect(canAccessExercise("P1-E02")).toBe(false);
-    expect(canAccessExercise("P2-E01")).toBe(false);
+  it("starts with only the prerequisite-free exercise in stage 0 unlocked", () => {
+    expect(canAccessExercise("S0-E01")).toBe(true);
+    expect(canAccessExercise("S0-E02")).toBe(false);
+    expect(canAccessExercise("S1-E01")).toBe(false);
   });
 
-  it("keeps phase 2 locked until every phase 1 exercise is mastered", () => {
-    expect(canUnlockPhase("phase-2")).toBe(false);
+  it("keeps stage 1 locked until every stage 0 exercise is mastered", () => {
+    expect(canUnlockPhase("phase-1")).toBe(false);
   });
 
   it("unlocks the next exercise only after its prerequisite is mastered", () => {
-    expect(canAccessExercise("P1-E02")).toBe(false);
-    masterExercise("P1-E01");
-    expect(canAccessExercise("P1-E02")).toBe(true);
+    expect(canAccessExercise("S0-E02")).toBe(false);
+    masterExercise("S0-E01");
+    expect(canAccessExercise("S0-E02")).toBe(true);
   });
 
-  it("unlocks phase 2 only once all of phase 1 is mastered, cascading to its first exercise", () => {
-    const phase1Ids = ["P1-E01", "P1-E02", "P1-E03", "P1-E04", "P1-E05", "P1-E06", "P1-E07", "P1-E08", "P1-E09"];
-    for (const id of phase1Ids) masterExercise(id);
+  it("unlocks stage 1 only once all of stage 0 is mastered, cascading to its first exercise", () => {
+    const stage0Ids = ["S0-E01", "S0-E02", "S0-E03", "S0-E04"];
+    for (const id of stage0Ids) masterExercise(id);
 
-    expect(canUnlockPhase("phase-2")).toBe(false);
-    expect(canAccessExercise("P2-E01")).toBe(false);
+    expect(canUnlockPhase("phase-1")).toBe(false);
+    expect(canAccessExercise("S1-E01")).toBe(false);
 
-    masterExercise("P1-E10");
+    masterExercise("S0-E05");
 
-    expect(canUnlockPhase("phase-2")).toBe(true);
-    expect(canAccessExercise("P2-E01")).toBe(true);
+    expect(canUnlockPhase("phase-1")).toBe(true);
+    expect(canAccessExercise("S1-E01")).toBe(true);
   });
 
   it("reports curriculum state progress percentages derived from mastered counts", () => {
-    masterExercise("P1-E01");
+    masterExercise("S0-E01");
     const state = getCurriculumState();
-    const phase1 = state.phases.find((p) => p.number === 0)!;
-    expect(phase1.masteredExercises).toBe(1);
-    expect(phase1.progress).toBe(10); // 1 of 10 phase-1 exercises mastered
+    const stage0 = state.phases.find((p) => p.number === 0)!;
+    expect(stage0.masteredExercises).toBe(1);
+    expect(stage0.progress).toBe(20); // 1 of 5 stage-0 exercises mastered
 
-    expect(getDb().progress["P1-E01"].status).toBe("MASTERED");
+    expect(getDb().progress["S0-E01"].status).toBe("MASTERED");
   });
 });

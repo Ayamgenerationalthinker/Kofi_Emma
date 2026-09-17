@@ -18,10 +18,10 @@ describe("Curriculum page", () => {
     );
 
     expect(screen.getByText(/Master all Level 0 prerequisites/)).toBeInTheDocument();
-    expect(screen.getAllByText(/Level 1 — Rhythm Foundation/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Stage 1 — Hand Technique/).length).toBeGreaterThan(0);
   });
 
-  it("shows the first level-0 exercise as available once expanded", async () => {
+  it("shows the first stage-0 exercise as available once expanded", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter>
@@ -29,8 +29,8 @@ describe("Curriculum page", () => {
       </MemoryRouter>
     );
 
-    await user.click(screen.getByText(/Level 0 — Absolute Beginner/).closest("button")!);
-    expect(await screen.findByText("Meet the Drum Kit")).toBeInTheDocument();
+    await user.click(screen.getByText(/Stage 0 — Orientation/).closest("button")!);
+    expect(await screen.findByText("5-Piece Drum Kit Anatomy & Setup")).toBeInTheDocument();
     expect(screen.getByText("Available")).toBeInTheDocument();
   });
 });

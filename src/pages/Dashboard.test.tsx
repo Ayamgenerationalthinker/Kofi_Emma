@@ -5,7 +5,7 @@ import { Dashboard } from "./Dashboard";
 import { AppProvider } from "../context/AppContext";
 import { AuthProvider } from "../context/AuthContext";
 import { createUser } from "../services/profileService";
-import { masterExercise } from "../services/curriculumService";
+import { masterExercise, ensureProgressInitialized } from "../services/curriculumService";
 
 function renderDashboard() {
   return render(
@@ -30,23 +30,24 @@ describe("Dashboard page", () => {
       morningTime: "07:00",
       eveningTime: "19:00",
     });
+    ensureProgressInitialized();
   });
 
-  it("renders the current level, stats, and a start-shed link", async () => {
+  it("renders the current stage, routine, and start-lesson CTA", async () => {
     renderDashboard();
-    await waitFor(() => expect(screen.getByText(/START SHED/i)).toBeInTheDocument());
-    expect(screen.getAllByText(/Absolute Beginner/).length).toBeGreaterThan(0);
-    expect(screen.getByText("Meet the Drum Kit")).toBeInTheDocument(); // today's shed headline exercise
+    await waitFor(() => expect(screen.getByText(/Start Lesson/i)).toBeInTheDocument());
+    expect(screen.getAllByText(/STAGE 0 OF 10/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("5-Piece Drum Kit Anatomy & Setup").length).toBeGreaterThan(0);
   });
 
-  it("shows a locked icon for locked levels", () => {
+  it("reflects today's practice routine", () => {
     renderDashboard();
-    expect(screen.getAllByLabelText("Locked").length).toBeGreaterThan(0);
+    expect(screen.getByText("Today's Routine (25 min total)")).toBeInTheDocument();
   });
 
-  it("reflects mastery progress in the level progress bar", () => {
-    masterExercise("P1-E01");
+  it("reflects mastery progress when an exercise is mastered", () => {
+    masterExercise("S0-E01");
     renderDashboard();
-    expect(screen.getByText("1/10 mastered")).toBeInTheDocument();
+    expect(screen.getByText(/1 lessons mastered/i)).toBeInTheDocument();
   });
 });

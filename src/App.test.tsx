@@ -37,13 +37,8 @@ async function completeOnboarding(user: ReturnType<typeof userEvent.setup>, name
   await user.click(screen.getByRole("button", { name: "START MY FIRST SHED" }));
 }
 
-// Exercises the full first-run flow through the real App component (no
-// mocks) — no browser was available to click through this session, so this
-// is the closest verification: onboarding -> profile created in
-// LocalStorage -> Home renders -> data persists across a "reload" (a fresh
-// AppProvider mount reading the same LocalStorage).
 describe("App first-run flow", () => {
-  it("shows the onboarding wizard with no profile, then the home shed launchpad after completing it", async () => {
+  it("shows the onboarding wizard with no profile, then the home launchpad after completing it", async () => {
     const user = userEvent.setup();
     renderApp();
 
@@ -51,7 +46,7 @@ describe("App first-run flow", () => {
 
     await completeOnboarding(user, "Kwame");
 
-    await waitFor(() => expect(screen.getByText(/START SHED/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Start Lesson/i)).toBeInTheDocument());
     expect(screen.getAllByText(/Kwame/).length).toBeGreaterThan(0);
   });
 
@@ -60,7 +55,7 @@ describe("App first-run flow", () => {
     const { unmount } = renderApp();
 
     await completeOnboarding(user, "Ama");
-    await waitFor(() => expect(screen.getByText(/START SHED/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Start Lesson/i)).toBeInTheDocument());
 
     unmount();
 
@@ -68,6 +63,6 @@ describe("App first-run flow", () => {
 
     // No onboarding this time — the profile survived in localStorage.
     expect(screen.queryByText("Your rhythm starts here.")).not.toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText(/START SHED/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Start Lesson/i)).toBeInTheDocument());
   });
 });

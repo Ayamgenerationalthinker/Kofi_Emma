@@ -34,7 +34,7 @@ export type ProgressStatus = "LOCKED" | "AVAILABLE" | "IN_PROGRESS" | "REPEAT" |
 
 export interface MetronomeEvent {
   position: number;
-  limb: "R" | "L" | "K" | "H" | "HH" | "REST";
+  limb: "R" | "L" | "K" | "H" | "HH" | "C" | "RD" | "T1" | "T2" | "FT" | "REST";
   accent?: boolean;
 }
 
